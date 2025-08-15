@@ -4,12 +4,12 @@ import { SettingsButton } from '@/components/ui/settings-button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useTheme } from '@/hooks/use-theme';
 
-export interface WindowTitlebarProps {
+export interface WindowTitleBarProps {
   /** Optional title text; defaults to VITE_APP_NAME for consistency across windows */
   title?: string;
 }
 
-export const WindowTitlebar = ({ title }: WindowTitlebarProps): React.JSX.Element => {
+export const WindowTitleBar = ({ title }: WindowTitleBarProps): React.JSX.Element => {
   const text = title ?? import.meta.env.VITE_APP_NAME;
   
   // Use theme store for centralized theme management
@@ -59,4 +59,4 @@ export const WindowTitlebar = ({ title }: WindowTitlebarProps): React.JSX.Elemen
   );
 };
 
-export default WindowTitlebar;
+export default WindowTitleBar;
