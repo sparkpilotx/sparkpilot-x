@@ -11,6 +11,7 @@
  */
 
 import type { ElectronAPI } from '@electron-toolkit/preload';
+import type { Theme } from '@shared/theme';
 
 declare global {
   interface Window {
@@ -44,6 +45,13 @@ declare global {
     xAPI: ElectronAPI & {
       // TODO(api): Add custom app-specific methods
       // Examples: dialog management, file operations, native OS integration
+
+      /**
+       * Notify the main process that the native theme source should be changed.
+       * 
+       * @param source - The theme source to set.
+       */
+      setNativeThemeSource: (source: Theme) => void;
     };
   }
 }

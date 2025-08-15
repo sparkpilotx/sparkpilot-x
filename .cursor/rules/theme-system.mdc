@@ -1,0 +1,201 @@
+---
+description: Theme system architecture and implementation guide
+---
+
+# Theme System Architecture
+
+## What: Complete Light/Dark/System Theme Implementation
+
+SparkPilot-X implements a comprehensive theme system that synchronizes both renderer UI and native Electron elements across light, dark, and system theme preferences.
+
+### Core Components
+
+- **[Theme Store](mdc:src/renderer/src/stores/theme-store.ts)** - Zustand store with middleware stack for centralized theme state
+- **[Theme Hook](mdc:src/renderer/src/hooks/use-theme.ts)** - React hooks for theme access with atomic selectors
+- **[IPC Handlers](mdc:src/main/ipc-handlers.ts)** - Main process handlers for native theme updates
+- **[Theme Types](mdc:src/main/shared/theme.ts)** - Shared TypeScript definitions and validation
+- **[CSS Variables](mdc:src/renderer/src/styles/main.css)** - shadcn/ui theme system with light/dark variants
+
+## Why: Design Decisions and Benefits
+
+### Architecture Choices
+
+1. **Zustand with Middleware Stack**: `devtools(persist(subscribeWithSelector(immer())))`
+   - Follows renderer rules for global state management
+   - Provides Redux DevTools integration, persistence, selective subscriptions, and immutable updates
+
+2. **localStorage as Single Source of Truth**
+   - Theme preference persisted in browser storage
+   - Main process synced at startup to match stored preference
+   - Eliminates theme mismatches between renderer and native UI
+
+3. **CSS Custom Properties + Tailwind v4**
+   - Leverages existing shadcn/ui design system
+   - Dynamic theme switching via `.dark` class on `document.documentElement`
+   - No CSS rebuilding required for theme changes
+
+4. **IPC Communication for Native Sync**
+   - Secure renderer ↔ main process communication
+   - Updates `nativeTheme.themeSource` for system UI consistency
+   - Handles window chrome, dialogs, and native elements
+
+### Benefits
+
+- **Seamless UX**: Instant theme switching with visual feedback
+- **System Integration**: Respects macOS appearance settings
+- **Persistence**: Remembers user preference across app restarts
+- **Performance**: Atomic selectors prevent unnecessary re-renders
+- **Type Safety**: Full TypeScript coverage with validation
+
+## How: Implementation Patterns and Usage
+
+### Theme Store Usage
+
+```typescript
+// Full theme state (auto-initializes on first use)
+const { theme, resolvedTheme, setTheme, isDark } = useTheme();
+
+// Lightweight hooks for specific needs
+const theme = useThemePreference();
+const resolvedTheme = useResolvedTheme();
+const setTheme = useThemeActions();
+
+// Multiple values with performance optimization
+const { theme, resolvedTheme } = useThemeStore(
+  useShallow(state => ({ theme: state.theme, resolvedTheme: state.resolvedTheme }))
+);
+```
+
+### Component Integration
+
+```typescript
+// Theme-aware component following renderer rules
+interface MyComponentProps {
+  title: string;
+}
+
+const MyComponent = ({ title }: MyComponentProps): React.JSX.Element => {
+  const { isDark, setTheme } = useTheme();
+  
+  return (
+    <div className={cn('bg-background text-foreground', isDark && 'custom-dark-styles')}>
+      <h1>{title}</h1>
+      <button onClick={() => setTheme('dark')}>Dark Mode</button>
+    </div>
+  );
+};
+```
+
+### CSS Theme Classes
+
+The theme system uses CSS custom properties with a class-based switching mechanism:
+
+```css
+/* Light theme variables (default state) */
+:root {
+  --background: /* light background color */;
+  --foreground: /* dark text color */;
+  --card: /* light card background */;
+  --card-foreground: /* dark card text */;
+  --primary: /* primary brand color */;
+  --primary-foreground: /* primary text color */;
+  --secondary: /* secondary background */;
+  --secondary-foreground: /* secondary text */;
+  --muted: /* muted background */;
+  --muted-foreground: /* muted text */;
+  --accent: /* accent background */;
+  --accent-foreground: /* accent text */;
+  --destructive: /* error/danger color */;
+  --border: /* border color */;
+  --input: /* input field background */;
+  --ring: /* focus ring color */;
+  /* ... additional semantic color variables */
+}
+
+/* Dark theme overrides (applied when .dark class is present) */
+.dark {
+  --background: /* dark background color */;
+  --foreground: /* light text color */;
+  --card: /* dark card background */;
+  --card-foreground: /* light card text */;
+  /* ... inverted color relationships for dark mode */
+}
+
+/* Tailwind v4 integration layer */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  /* ... maps CSS variables to Tailwind design tokens */
+}
+```
+
+**Key Principles:**
+- **Semantic Naming**: Variables represent purpose, not specific colors
+- **Consistent Structure**: Same variable names in both light and dark themes
+- **Inverted Relationships**: Dark theme maintains contrast ratios with inverted values
+- **Tailwind Integration**: `@theme` directive maps variables to Tailwind classes
+- **Auto-Generated**: Colors come from shadcn/ui theme generator for consistency
+
+### IPC Theme Communication
+
+```typescript
+// Renderer to Main (via preload)
+window.xAPI.setNativeThemeSource('dark');
+
+// Main process handler
+ipcMain.on(IPC_CHANNELS.R2M_NTF_THEME_SOURCE_CHANGED, (event, source) => {
+  const validatedTheme = parseTheme(source);
+  nativeTheme.themeSource = validatedTheme;
+});
+```
+
+## Implementation Flow
+
+### Startup Sequence
+1. **App loads** → Zustand hydrates theme from localStorage
+2. **Theme store initializes** → Detects system preference, resolves theme
+3. **DOM updated** → Applies `.dark` class if needed
+4. **Main process synced** → IPC call updates `nativeTheme.themeSource`
+5. **UI rendered** → Both renderer and native themes match stored preference
+
+### Theme Change Sequence
+1. **User clicks toggle** → `setTheme()` called with new preference
+2. **Store updates** → State updated, theme resolved, DOM class applied
+3. **IPC notification** → Main process receives theme change
+4. **Native update** → `nativeTheme.themeSource` updated
+5. **Visual feedback** → Both renderer and native UI change instantly
+
+### System Theme Detection
+1. **Media query listener** → Monitors `(prefers-color-scheme: dark)`
+2. **System change detected** → `updateSystemPreference()` called
+3. **Theme re-resolved** → If current theme is 'system', resolved theme updates
+4. **DOM updated** → CSS classes applied based on new resolution
+5. **Native synced** → Main process notified if needed
+
+## Maintenance Guidelines
+
+### Adding New Theme-Aware Components
+1. Use `useTheme()` hook for theme access
+2. Leverage CSS custom properties for colors
+3. Use `isDark`/`isLight` flags for conditional logic
+4. Follow atomic selector patterns for performance
+
+### Extending Theme Options
+1. Update `ThemeSchema` in [theme.ts](mdc:src/main/shared/theme.ts)
+2. Add new theme handling in store resolvers
+3. Update CSS variables if needed
+4. Test IPC communication with new values
+
+### Debugging Theme Issues
+1. Check Redux DevTools for store state
+2. Verify CSS class application on `document.documentElement`
+3. Monitor IPC messages in main process logs
+4. Test system theme detection with OS changes
+
+## Security Considerations
+
+- **Input Validation**: All theme values validated with Zod schema
+- **IPC Security**: Theme changes use notification pattern, not request/response
+- **Fallback Handling**: Invalid themes default to 'system' for safety
+- **Type Safety**: Full TypeScript coverage prevents runtime errors

@@ -16,6 +16,9 @@
 import { electronAPI } from '@electron-toolkit/preload';
 import { contextBridge, ipcRenderer } from 'electron';
 
+import { IPC_CHANNELS } from '@shared/ipc';
+import { Theme } from '@shared/theme';
+
 /**
  * Extended Electron API combining standard functionality with custom features.
  * 
@@ -40,6 +43,8 @@ import { contextBridge, ipcRenderer } from 'electron';
  */
 const xAPI = {
   ...electronAPI,
+
+  setNativeThemeSource: (source: Theme) => ipcRenderer.send(IPC_CHANNELS.R2M_NTF_THEME_SOURCE_CHANGED, source),
 };
 
 /**

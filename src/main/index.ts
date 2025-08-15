@@ -3,6 +3,8 @@ import { shell } from 'electron/common';
 import { join } from 'path';
 import { is, platform } from '@electron-toolkit/utils';
 
+import { registerIpcHandlers, unregisterIpcHandlers } from './ipc-handlers';
+
 /**
  * Main process entry point for SparkPilot-X
  * 
@@ -147,6 +149,9 @@ const createWindow = (): void => {
  * conventions for single-window applications.
  */
 app.whenReady().then(() => {
+  // Register IPC handlers before creating the window
+  registerIpcHandlers();
+  
   createWindow();
 
   // macOS: Re-create window when dock icon is clicked
@@ -162,6 +167,11 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+// Clean up IPC handlers before quitting
+app.on('before-quit', () => {
+  unregisterIpcHandlers();
 });
 
 // Security: Prevent unauthorized navigation and redirect to external browser

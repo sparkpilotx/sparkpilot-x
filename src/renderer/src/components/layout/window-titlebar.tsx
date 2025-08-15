@@ -2,8 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { SettingsButton } from '@/components/ui/settings-button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import type { Theme } from '@shared/theme';
-import { DEFAULT_THEME } from '@shared/theme';
+import { useTheme } from '@/hooks/use-theme';
 
 export interface WindowTitlebarProps {
   /** Optional title text; defaults to VITE_APP_NAME for consistency across windows */
@@ -13,14 +12,8 @@ export interface WindowTitlebarProps {
 export const WindowTitlebar = ({ title }: WindowTitlebarProps): React.JSX.Element => {
   const text = title ?? import.meta.env.VITE_APP_NAME;
   
-  // TODO: Replace with actual theme state management (e.g., Zustand store)
-  const [currentTheme, setCurrentTheme] = React.useState<Theme>(DEFAULT_THEME);
-  
-  const handleThemeChange = (theme: Theme) => {
-    console.log('Theme changed to:', theme);
-    setCurrentTheme(theme);
-    // TODO: Implement actual theme switching logic
-  };
+  // Use theme store for centralized theme management
+  const { theme, setTheme } = useTheme();
 
   return (
     <header
@@ -44,11 +37,11 @@ export const WindowTitlebar = ({ title }: WindowTitlebarProps): React.JSX.Elemen
           {/* Theme Toggle
            * Cycles through light, dark, and system theme preferences
            * Shows current theme icon and provides helpful tooltip
-           * TODO: Integrate with actual theme management system
+           * Integrated with Zustand theme store for centralized state management
            */}
           <ThemeToggle
-            theme={currentTheme}
-            onThemeChange={handleThemeChange}
+            theme={theme}
+            onThemeChange={setTheme}
             className="h-6 w-6"
           />
           
