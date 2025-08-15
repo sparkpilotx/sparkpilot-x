@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron/main';
+import { app, BrowserWindow, screen } from 'electron/main';
 import { shell } from 'electron/common';
 import { join } from 'path';
 import { is, platform } from '@electron-toolkit/utils';
@@ -27,12 +27,68 @@ let mainWindow: BrowserWindow | null = null;
  * @remarks
  * Security: Uses contextIsolation and disables nodeIntegration to prevent
  * renderer process from accessing Node.js APIs directly.
+ * 
+ * Development: In dev mode, attempts to display window on second display if available
  */
 const createWindow = (): void => {
-  mainWindow = new BrowserWindow({
-    // Window dimensions and constraints
+  // Get available displays for positioning
+  const displays = screen.getAllDisplays();
+  const primaryDisplay = screen.getPrimaryDisplay();
+  
+  // In development mode, try to use second display if available
+  let targetDisplay = primaryDisplay;
+  let windowBounds = {
     width: 1200,
     height: 800,
+    x: undefined as number | undefined,
+    y: undefined as number | undefined
+  };
+  
+  if (is.dev && displays.length > 1) {
+    // Find the first non-primary display
+    const secondaryDisplay = displays.find(display => display.id !== primaryDisplay.id);
+    if (secondaryDisplay) {
+      targetDisplay = secondaryDisplay;
+      // Position window on secondary display
+      windowBounds.x = secondaryDisplay.bounds.x;
+      windowBounds.y = secondaryDisplay.bounds.y;
+      console.log(`Development mode: Positioning window on secondary display (${secondaryDisplay.bounds.x}, ${secondaryDisplay.bounds.y})`);
+    }
+  }
+  
+  // Calculate optimal 16:9 dimensions for the target display
+  // Leave some margin (80px total) to account for window decorations and ensure it fits
+  const margin = 80;
+  const maxWidth = targetDisplay.bounds.width - margin;
+  const maxHeight = targetDisplay.bounds.height - margin;
+  
+  // Calculate the largest 16:9 dimensions that fit within the display bounds
+  const aspectRatio = 16 / 9;
+  let optimalWidth = maxWidth;
+  let optimalHeight = optimalWidth / aspectRatio;
+  
+  // If height exceeds bounds, scale down proportionally
+  if (optimalHeight > maxHeight) {
+    optimalHeight = maxHeight;
+    optimalWidth = optimalHeight * aspectRatio;
+  }
+  
+  // Ensure minimum dimensions are met
+  windowBounds.width = Math.max(Math.round(optimalWidth), 800);
+  windowBounds.height = Math.max(Math.round(optimalHeight), 600);
+  
+  // Center the window on the target display if we're positioning it there
+  if (windowBounds.x !== undefined && windowBounds.y !== undefined) {
+    windowBounds.x += (targetDisplay.bounds.width - windowBounds.width) / 2;
+    windowBounds.y += (targetDisplay.bounds.height - windowBounds.height) / 2;
+  }
+
+  mainWindow = new BrowserWindow({
+    // Window dimensions and constraints
+    width: windowBounds.width,
+    height: windowBounds.height,
+    x: windowBounds.x,
+    y: windowBounds.y,
     minWidth: 800,
     minHeight: 600,
     maxWidth: 1920,
@@ -45,7 +101,7 @@ const createWindow = (): void => {
     
     // Window behavior
     show: false, // Prevents visual flash during initialization
-    center: true, // Center window on screen
+    center: !windowBounds.x && !windowBounds.y, // Only center if not positioned on secondary display
     alwaysOnTop: false,
     skipTaskbar: false,
     focusable: true,
