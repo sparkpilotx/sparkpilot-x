@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { trpc } from '@/lib/trpc';
+import { cn } from '@/lib/utils';
 
 /**
  * Properties for the HelloWithName component.
@@ -94,23 +95,23 @@ const HelloWithName = ({ className }: HelloWithNameProps): React.JSX.Element => 
   };
 
   return (
-    <Card className={className}>
-      <CardHeader>
+    <Card className={cn("h-full", className)}>
+      <CardHeader className="pb-6">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5 text-blue-500" />
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <User className="h-6 w-6 text-blue-500" />
               Hello with Name Query
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-base mt-2">
               tRPC query with input validation using Zod schemas for safe parameter handling.
             </CardDescription>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs">
+          <div className="flex items-center gap-3">
+            <Badge variant="outline" className="text-sm px-3 py-1">
               {name.trim() ? `${name.trim().length}/50` : '0/50'}
             </Badge>
-            <Badge variant={data ? "default" : getValidationStatus() === 'valid' ? "secondary" : "destructive"}>
+            <Badge variant={data ? "default" : getValidationStatus() === 'valid' ? "secondary" : "destructive"} className="text-sm px-3 py-1">
               {data ? "Greeted" : getValidationStatus() === 'valid' ? "Ready" : "Invalid"}
             </Badge>
           </div>
@@ -120,18 +121,18 @@ const HelloWithName = ({ className }: HelloWithNameProps): React.JSX.Element => 
       <CardContent className="space-y-6">
         {/* Input Form */}
         <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <MessageSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg flex items-center gap-3">
+              <MessageSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               Personal Greeting
             </CardTitle>
           </CardHeader>
           
-          <CardContent className="space-y-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name-input" className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          <CardContent className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-3">
+                <Label htmlFor="name-input" className="flex items-center gap-3 text-base">
+                  <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   Your Name
                 </Label>
                 <Input
@@ -140,35 +141,35 @@ const HelloWithName = ({ className }: HelloWithNameProps): React.JSX.Element => 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your name (letters and spaces only)"
-                  className={`border-blue-200 focus:border-blue-500 focus:ring-blue-500 ${
-                    getValidationStatus() === 'valid' ? 'border-green-300 focus:border-green-500 focus:ring-green-500' : ''
-                  } ${
+                  className={cn(
+                    "h-12 text-base border-blue-200 focus:border-blue-500 focus:ring-blue-500",
+                    getValidationStatus() === 'valid' ? 'border-green-300 focus:border-green-500 focus:ring-green-500' : '',
                     getValidationStatus() === 'invalid' ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''
-                  }`}
+                  )}
                   maxLength={50}
                 />
-                <div className="flex items-center gap-2">
-                  <Info className={`h-3 w-3 ${getValidationColor()}`} />
-                  <p className={`text-xs ${getValidationColor()}`}>
+                <div className="flex items-center gap-3">
+                  <Info className={`h-4 w-4 ${getValidationColor()}`} />
+                  <p className={`text-sm ${getValidationColor()}`}>
                     {getValidationMessage()}
                   </p>
                 </div>
               </div>
               
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-3 pt-3">
                 <Button 
                   type="submit" 
                   disabled={getValidationStatus() !== 'valid' || isLoading}
-                  className="flex-1"
+                  className="flex-1 h-12 text-base"
                 >
                   {isLoading ? (
                     <>
-                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                      <RefreshCw className="mr-3 h-5 w-5 animate-spin" />
                       Sending...
                     </>
                   ) : (
                     <>
-                      <Send className="mr-2 h-4 w-4" />
+                      <Send className="mr-3 h-5 w-5" />
                       Say Hello
                     </>
                   )}
@@ -180,8 +181,9 @@ const HelloWithName = ({ className }: HelloWithNameProps): React.JSX.Element => 
                     onClick={() => refetch()}
                     disabled={isLoading}
                     variant="outline"
+                    className="h-12 text-base"
                   >
-                    <RefreshCw className="mr-2 h-4 w-4" />
+                    <RefreshCw className="mr-3 h-5 w-5" />
                     Refresh
                   </Button>
                 )}
@@ -190,8 +192,9 @@ const HelloWithName = ({ className }: HelloWithNameProps): React.JSX.Element => 
                   type="button" 
                   onClick={handleReset}
                   variant="outline"
+                  className="h-12 text-base"
                 >
-                  <RotateCcw className="mr-2 h-4 w-4" />
+                  <RotateCcw className="mr-3 h-5 w-5" />
                   Reset
                 </Button>
               </div>
@@ -202,20 +205,20 @@ const HelloWithName = ({ className }: HelloWithNameProps): React.JSX.Element => 
         {/* Error State */}
         {error && (
           <Card className="border-destructive/50 bg-destructive/5">
-            <CardContent className="pt-4">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
-                <div className="space-y-2">
-                  <div className="space-y-1">
-                    <p className="font-medium text-destructive">Validation Error</p>
-                    <p className="text-sm text-destructive/80">{error.message}</p>
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <AlertCircle className="h-6 w-6 text-destructive mt-1 flex-shrink-0" />
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <p className="font-medium text-destructive text-lg">Validation Error</p>
+                    <p className="text-base text-destructive/80">{error.message}</p>
                   </div>
                   
-                  <details className="text-sm">
+                  <details className="text-base">
                     <summary className="cursor-pointer text-destructive/80 hover:text-destructive font-medium">
                       Show error details
                     </summary>
-                    <pre className="mt-2 p-2 bg-destructive/10 rounded text-xs overflow-auto text-destructive/80 border border-destructive/20">
+                    <pre className="mt-3 p-3 bg-destructive/10 rounded-lg text-sm overflow-auto text-destructive/80 border border-destructive/20">
                       {JSON.stringify(error, null, 2)}
                     </pre>
                   </details>
@@ -228,75 +231,75 @@ const HelloWithName = ({ className }: HelloWithNameProps): React.JSX.Element => 
         {/* Success State */}
         {data && (
           <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/20">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                <CardTitle className="text-lg text-blue-800 dark:text-blue-200">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <CardTitle className="text-xl text-blue-800 dark:text-blue-200">
                   {data.message}
                 </CardTitle>
               </div>
             </CardHeader>
             
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-5">
               <Separator className="bg-blue-200 dark:bg-blue-800" />
               
               {/* Input Summary */}
-              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-md border border-blue-200 dark:border-blue-700">
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="secondary" className="text-xs">
-                    <User className="mr-1 h-3 w-3" />
+              <div className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
+                <div className="flex items-center gap-3 mb-3">
+                  <Badge variant="secondary" className="text-sm px-3 py-1">
+                    <User className="mr-2 h-4 w-4" />
                     Input Received
                   </Badge>
                 </div>
-                <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                <p className="text-base font-medium text-blue-800 dark:text-blue-200">
                   "{data.inputReceived}"
                 </p>
               </div>
               
               {/* Metadata Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                <div className="flex items-center gap-2 p-2 rounded-md bg-blue-100 dark:bg-blue-900/30">
-                  <Badge variant="outline" className="text-xs">
-                    <Hash className="mr-1 h-3 w-3" />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                  <Badge variant="outline" className="text-sm px-3 py-1">
+                    <Hash className="mr-2 h-4 w-4" />
                     Characters
                   </Badge>
-                  <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                  <span className="text-base font-medium text-blue-800 dark:text-blue-200">
                     {data.characterCount}
                   </span>
                 </div>
                 
-                <div className="flex items-center gap-2 p-2 rounded-md bg-blue-100 dark:bg-blue-900/30">
-                  <Badge variant="outline" className="text-xs">
-                    <Monitor className="mr-1 h-3 w-3" />
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                  <Badge variant="outline" className="text-sm px-3 py-1">
+                    <Monitor className="mr-2 h-4 w-4" />
                     Platform
                   </Badge>
-                  <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                  <span className="text-base font-medium text-blue-800 dark:text-blue-200">
                     {data.platform}
                   </span>
                 </div>
                 
-                <div className="flex items-center gap-2 p-2 rounded-md bg-blue-100 dark:bg-blue-900/30">
-                  <Badge variant="outline" className="text-xs">
-                    <MessageSquare className="mr-1 h-3 w-3" />
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                  <Badge variant="outline" className="text-sm px-3 py-1">
+                    <MessageSquare className="mr-2 h-4 w-4" />
                     Version
                   </Badge>
-                  <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                  <span className="text-base font-medium text-blue-800 dark:text-blue-200">
                     {data.version}
                   </span>
                 </div>
                 
-                <div className="flex items-center gap-2 p-2 rounded-md bg-blue-100 dark:bg-blue-900/30">
-                  <Badge variant="outline" className="text-xs">
-                    <Clock className="mr-1 h-3 w-3" />
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                  <Badge variant="outline" className="text-sm px-3 py-1">
+                    <Clock className="mr-2 h-4 w-4" />
                     Timestamp
                   </Badge>
-                  <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                  <span className="text-base font-medium text-blue-800 dark:text-blue-200">
                     {new Date(data.timestamp).toLocaleString()}
                   </span>
                 </div>
               </div>
               
-              <div className="text-xs text-blue-600 dark:text-blue-400 text-center">
+              <div className="text-sm text-blue-600 dark:text-blue-400 text-center">
                 Greeting sent successfully • Input validation passed
               </div>
             </CardContent>
