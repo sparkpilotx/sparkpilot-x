@@ -44,3 +44,7 @@ coverage/
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
+
+# TypeScript build info files (project references)
+*.tsbuildinfo
+tsconfig.*.tsbuildinfo
