@@ -4,6 +4,7 @@ import { join } from 'path';
 import { is, platform } from '@electron-toolkit/utils';
 
 import { registerIpcHandlers, unregisterIpcHandlers } from './ipc-handlers';
+import { startTrpcServer, stopTrpcServer } from './trpc/server';
 
 /**
  * Main process entry point for SparkPilot-X
@@ -145,10 +146,15 @@ const createWindow = (): void => {
  * Application lifecycle event handlers
  * 
  * @remarks
+ * tRPC Server: Started when app is ready and stopped gracefully before quit
  * macOS: Re-creates window when dock icon is clicked, following platform
  * conventions for single-window applications.
  */
 app.whenReady().then(() => {
+  // Start tRPC server before creating the window
+  // This enables type-safe API communication between main and renderer processes
+  startTrpcServer();
+  
   // Register IPC handlers before creating the window
   registerIpcHandlers();
   
@@ -169,9 +175,10 @@ app.on('window-all-closed', () => {
   }
 });
 
-// Clean up IPC handlers before quitting
-app.on('before-quit', () => {
+// Clean up IPC handlers and stop tRPC server before quitting
+app.on('before-quit', async () => {
   unregisterIpcHandlers();
+  await stopTrpcServer();
 });
 
 // Security: Prevent unauthorized navigation and redirect to external browser

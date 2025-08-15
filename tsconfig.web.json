@@ -3,6 +3,7 @@
   "include": [
     "src/renderer/**/*",
     "src/main/shared/**/*",
+    "src/main/trpc/**/*",
     "src/preload/index.d.ts"
   ],
   "exclude": [
