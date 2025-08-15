@@ -37,25 +37,16 @@ const createWindow = (): void => {
   
   // In development mode, try to use second display if available
   let targetDisplay = primaryDisplay;
-  let windowBounds = {
-    width: 1200,
-    height: 800,
-    x: undefined as number | undefined,
-    y: undefined as number | undefined
-  };
   
   if (is.dev && displays.length > 1) {
     // Find the first non-primary display
     const secondaryDisplay = displays.find(display => display.id !== primaryDisplay.id);
     if (secondaryDisplay) {
       targetDisplay = secondaryDisplay;
-      // Position window on secondary display
-      windowBounds.x = secondaryDisplay.bounds.x;
-      windowBounds.y = secondaryDisplay.bounds.y;
-      console.log(`Development mode: Positioning window on secondary display (${secondaryDisplay.bounds.x}, ${secondaryDisplay.bounds.y})`);
+      console.log(`Development mode: Targeting secondary display`);
     }
   }
-  
+
   // Calculate optimal 16:9 dimensions for the target display
   // Leave some margin (80px total) to account for window decorations and ensure it fits
   const margin = 80;
@@ -73,22 +64,20 @@ const createWindow = (): void => {
     optimalWidth = optimalHeight * aspectRatio;
   }
   
-  // Ensure minimum dimensions are met
-  windowBounds.width = Math.max(Math.round(optimalWidth), 800);
-  windowBounds.height = Math.max(Math.round(optimalHeight), 600);
-  
-  // Center the window on the target display if we're positioning it there
-  if (windowBounds.x !== undefined && windowBounds.y !== undefined) {
-    windowBounds.x += (targetDisplay.bounds.width - windowBounds.width) / 2;
-    windowBounds.y += (targetDisplay.bounds.height - windowBounds.height) / 2;
-  }
+  // Set window bounds
+  const windowBounds = {
+    width: Math.max(Math.round(optimalWidth), 800),
+    height: Math.max(Math.round(optimalHeight), 600),
+    x: targetDisplay.bounds.x + (targetDisplay.bounds.width - Math.max(Math.round(optimalWidth), 800)) / 2,
+    y: targetDisplay.bounds.y + (targetDisplay.bounds.height - Math.max(Math.round(optimalHeight), 600)) / 2,
+  };
 
   mainWindow = new BrowserWindow({
     // Window dimensions and constraints
     width: windowBounds.width,
     height: windowBounds.height,
-    x: windowBounds.x,
-    y: windowBounds.y,
+    x: Math.round(windowBounds.x),
+    y: Math.round(windowBounds.y),
     minWidth: 800,
     minHeight: 600,
     maxWidth: 1920,
@@ -101,7 +90,7 @@ const createWindow = (): void => {
     
     // Window behavior
     show: false, // Prevents visual flash during initialization
-    center: !windowBounds.x && !windowBounds.y, // Only center if not positioned on secondary display
+    center: false, // Disable automatic centering, we are handling it manually
     alwaysOnTop: false,
     skipTaskbar: false,
     focusable: true,
