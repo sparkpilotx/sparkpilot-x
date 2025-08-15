@@ -205,3 +205,25 @@
 .titlebar-h {
   height: 36px;
 }
+
+/*
+ * Disable native scrollbars globally
+ * 
+ * Purpose: Prevent macOS overlay scrollbars from appearing above custom titlebar
+ * Strategy: Hide all native scrollbars while maintaining ScrollArea functionality
+ * Impact: Ensures consistent cross-platform scrolling behavior through ScrollArea components
+ */
+html, body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ensure ScrollArea components handle all scrolling */
+[data-slot="scroll-area"] {
+  overflow: hidden;
+}
