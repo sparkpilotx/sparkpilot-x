@@ -1,0 +1,44 @@
+---
+alwaysApply: true
+description: "Mandatory Project Essentials Rules"
+---
+
+sparkpilot-x: macOS-only desktop app.  
+Stack: Electron@37 + React@19 + TypeScript@5.8.3.  
+UI: shadcn/ui + TailwindCSS@4.  
+Build: Vite@7.  
+Node.js: v24 recommended.  
+Purpose: Creativity-inspiration tool.
+
+## Key Configuration Files
+
+- **[electron.vite.config.ts](mdc:electron.vite.config.ts)** - Main build configuration for Electron processes (main, preload, renderer) with Vite bundling, path aliases, and security settings
+- **[tsconfig.json](mdc:tsconfig.json)** - Root TypeScript configuration with project references, path mapping for shared utilities and renderer components
+- **[tsconfig.node.json](mdc:tsconfig.node.json)** - Node.js environment config for main/preload processes with Electron-specific types and module resolution
+- **[tsconfig.web.json](mdc:tsconfig.web.json)** - Browser environment config for renderer process with React JSX support and shared utility access
+- **[package.json](mdc:package.json)** - Project dependencies, build scripts, and Electron-specific configurations for macOS development
+- **[components.json](mdc:components.json)** - shadcn/ui component library configuration with TailwindCSS integration, path aliases, and design system settings
+
+## General Coding Style Requirements
+
+- Use kebab-case file names
+
+## General JavaScript/TypeScript Rules
+
+### ES Modules Only
+
+This project is configured to exclusively use ES Modules (`import`/`export` syntax). The `"type": "module"` setting in [package.json](mdc:package.json) and `"module": "ESNext"` in the TypeScript configuration enforce this. Do not use CommonJS (`require`/`module.exports`) to maintain consistency and leverage modern JavaScript features.
+
+### Prefer Plain Objects over Classes
+
+- Classes introduce unnecessary state encapsulation.
+- Prefer interfaces + pure functions for composability and readability.
+
+### Avoid `any`, Prefer `unknown`
+
+- Use `unknown` with narrowing; only use `as` assertions when strictly required.
+
+### Immutability & Array Methods
+
+- Use `.map`, `.filter`, `.reduce` for clean, immutable data operations.
+

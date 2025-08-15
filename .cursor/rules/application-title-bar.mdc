@@ -1,0 +1,181 @@
+---
+alwaysApply: false
+---
+# Application Title Bar Implementation Guide
+
+## What is the Application Title Bar?
+
+The application title bar is a custom, VSCode-like title bar component that replaces the native macOS window title bar while preserving the native traffic light controls (close, minimize, maximize). It provides a consistent, branded experience across the application while maintaining platform-specific behaviors.
+
+### Key Components
+
+- **[WindowTitlebar](mdc:src/renderer/src/components/layout/window-titlebar.tsx)** - React component implementing the custom title bar
+- **[Main process configuration](mdc:src/main/index.ts)** - Electron window setup with `titleBarOverlay`
+- **[CSS utilities](mdc:src/renderer/src/styles/main.css)** - Drag/no-drag region utilities and standard heights
+
+## Why This Design?
+
+### 1. macOS Platform Consistency
+- **Traffic Light Preservation**: Uses `titleBarStyle: 'hiddenInset'` to keep native macOS close/minimize/maximize buttons
+- **Platform Conventions**: Follows macOS design patterns for single-window applications
+- **Accessibility**: Maintains native window management behaviors users expect
+
+### 2. VSCode-like User Experience
+- **Familiar Interface**: Mimics VSCode's title bar behavior and appearance
+- **Custom Branding**: Allows application-specific styling and branding
+- **Consistent Layout**: Provides predictable drag regions and interactive areas
+
+### 3. Security & Performance
+- **Context Isolation**: Maintains Electron's security model with proper process separation
+- **Efficient Rendering**: Uses CSS backdrop filters and minimal DOM structure
+- **Responsive Design**: Adapts to different window sizes and content
+
+## How It Works
+
+### 1. Main Process Configuration
+
+```typescript
+// In src/main/index.ts
+titleBarStyle: platform.isMacOS ? 'hiddenInset' : 'default',
+titleBarOverlay: platform.isMacOS
+  ? {
+      color: '#00000000', // Transparent overlay
+      symbolColor: '#6B7280', // Traffic light symbol color
+      height: 40, // Standard title bar height
+    }
+  : undefined,
+```
+
+**What this does:**
+- `hiddenInset`: Hides the native title bar but preserves traffic lights
+- `titleBarOverlay`: Creates a transparent overlay where the renderer can draw custom UI
+- `height: 40`: Defines the standard title bar height for consistent spacing
+
+### 2. CSS Utilities
+
+```css
+/* In src/renderer/src/styles/main.css */
+.win-drag {
+  -webkit-app-region: drag;
+}
+.win-no-drag {
+  -webkit-app-region: no-drag;
+}
+.titlebar-h {
+  height: 40px;
+}
+```
+
+**What these do:**
+- `.win-drag`: Makes an element draggable (window can be moved by dragging this area)
+- `.win-no-drag`: Prevents dragging on interactive elements (buttons, inputs, etc.)
+- `.titlebar-h`: Standard height matching the main process overlay
+
+### 3. Component Structure
+
+```typescript
+// In src/renderer/src/components/layout/window-titlebar.tsx
+<header className="titlebar-h win-drag w-full select-none sticky top-0 z-50">
+  <div className="h-full w-full flex items-center gap-2 px-2">
+    {/* Left spacer for macOS traffic lights */}
+    <div className="w-[72px] shrink-0" />
+    
+    {/* Title text in draggable area */}
+    <div className="text-sm text-foreground/80 truncate">{text}</div>
+    
+    {/* Right actions - must be no-drag */}
+    <div className="ml-auto flex items-center gap-1 win-no-drag">
+      {/* Interactive controls go here */}
+    </div>
+  </div>
+</header>
+```
+
+**Layout Structure:**
+- **Left (72px)**: Reserved space for macOS traffic lights
+- **Center**: Application title (draggable)
+- **Right**: Interactive controls (no-drag)
+
+## How to Use
+
+### 1. Adding Interactive Controls
+
+```typescript
+// Add buttons or other interactive elements to the right container
+<div className="ml-auto flex items-center gap-1 win-no-drag">
+  <Button variant="ghost" size="sm">
+    <Settings className="h-4 w-4" />
+  </Button>
+  <Button variant="ghost" size="sm">
+    <User className="h-4 w-4" />
+  </Button>
+</div>
+```
+
+**Important:** Always wrap interactive controls with `win-no-drag` to ensure they remain clickable.
+
+### 2. Customizing the Title
+
+```typescript
+// Pass a custom title prop
+<WindowTitlebar title="My Custom Title" />
+
+// Or use the default (VITE_APP_NAME from environment)
+<WindowTitlebar />
+```
+
+### 3. Styling Variations
+
+```typescript
+// The component uses CSS variables for theming
+// Customize via src/renderer/src/styles/main.css
+:root {
+  --background: oklch(1.00 0 0);
+  --foreground: oklch(0.14 0.00 285.86);
+  --border: oklch(0.92 0.00 286.61);
+}
+```
+
+## Best Practices
+
+### 1. Drag Region Management
+- ✅ Use `.win-drag` for the main title bar area
+- ✅ Use `.win-no-drag` for all interactive elements
+- ✅ Keep drag regions large enough for comfortable window movement
+
+### 2. Layout Considerations
+- ✅ Maintain the 72px left spacer for macOS traffic lights
+- ✅ Use the standard 40px height for consistency
+- ✅ Position interactive controls on the right side
+
+### 3. Accessibility
+- ✅ Ensure sufficient contrast between title text and background
+- ✅ Provide clear visual feedback for interactive elements
+- ✅ Maintain keyboard navigation support
+
+### 4. Performance
+- ✅ Use CSS backdrop filters sparingly
+- ✅ Minimize DOM complexity in the title bar
+- ✅ Avoid heavy computations in the title bar component
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Controls not clickable**: Ensure they're wrapped with `win-no-drag`
+2. **Window not draggable**: Check that the main header has `win-drag`
+3. **Traffic lights overlap**: Verify the 72px left spacer is present
+4. **Height mismatch**: Ensure both main process and CSS use 40px
+
+### Debug Tips
+
+- Use Electron DevTools to inspect the title bar overlay
+- Check that `titleBarOverlay` is properly configured in main process
+- Verify CSS utilities are loaded and applied correctly
+- Test on different macOS versions for compatibility
+
+## Related Files
+
+- **[App.tsx](mdc:src/renderer/src/App.tsx)** - Main application component using the title bar
+- **[electron.vite.config.ts](mdc:electron.vite.config.ts)** - Build configuration for Electron processes
+- **[tsconfig.web.json](mdc:tsconfig.web.json)** - TypeScript configuration for renderer process

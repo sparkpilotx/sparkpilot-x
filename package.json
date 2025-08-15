@@ -1,0 +1,56 @@
+{
+  "name": "sparkpilot-x",
+  "productName": "sparkpilot-x",
+  "version": "1.0.0",
+  "description": "A macOS-oriented Electron application",
+  "main": "./out/main/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "electron-vite dev",
+    "build": "electron-vite build",
+    "clean": "rm -rf dist",
+    "build:mac": "npm run clean && npm run build && electron-builder --mac",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "keywords": [
+    "electron",
+    "typescript",
+    "macos",
+    "vite",
+    "trpc"
+  ],
+  "author": "simonxing",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@electron-toolkit/tsconfig": "^1.0.1",
+    "@tailwindcss/vite": "^4.1.11",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "electron": "^37.2.5",
+    "electron-builder": "^24.13.3",
+    "electron-vite": "^4.0.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "tailwindcss": "^4.1.11",
+    "typescript": "5.8.3",
+    "vite": "^7.0.6"
+  },
+  "dependencies": {
+    "@electron-toolkit/preload": "^3.0.2",
+    "@electron-toolkit/utils": "^4.0.0",
+    "@radix-ui/react-checkbox": "^1.3.3",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-switch": "^1.2.6",
+    "@radix-ui/react-tooltip": "^1.2.8",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
+    "lucide-react": "^0.536.0",
+    "tailwind-merge": "^3.3.1",
+    "tw-animate-css": "^1.3.6",
+    "zod": "3.25.67"
+  }
+}

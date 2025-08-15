@@ -1,0 +1,166 @@
+---
+globs: src/renderer/**/*
+alwaysApply: false
+---
+# Renderer Process Development Rules
+
+## MANDATORY COMPONENT PATTERNS
+
+### Component Type Definition
+- ALWAYS use explicit props interface + explicit return type
+- NEVER use React.FC or implicit typing
+- REQUIRED format: `(props: PropsInterface): React.JSX.Element`
+
+```typescript
+// CORRECT
+interface ButtonProps {
+  text: string;
+  onClick: () => void;
+}
+
+const Button = ({ text, onClick }: ButtonProps): React.JSX.Element => {
+  return <button onClick={onClick}>{text}</button>;
+};
+
+// INCORRECT
+const Button: React.FC<ButtonProps> = ({ text, onClick }) => {
+  return <button onClick={onClick}>{text}</button>;
+};
+```
+
+## STATE MANAGEMENT HIERARCHY
+
+### 1. Local Component State
+- Use `useState` for simple state
+- Use `useReducer` for complex state logic
+- Keep state as close to usage as possible
+
+### 2. Feature-Scope State
+- Use React Context for shared state within feature modules
+- Avoid prop drilling beyond 2 levels
+
+### 3. Global App State
+- Use Zustand with slice-based architecture
+- Implement atomic selectors with `useShallow`
+- Use middleware stack: `devtools(persist(subscribeWithSelector(immer())))`
+
+### 4. Main Process Integration
+- Use IPC for main process communication
+- Treat main process data as async source
+- Implement proper loading/error states
+
+## FORBIDDEN PATTERNS
+
+- ❌ `React.FC` usage
+- ❌ Browser localStorage (team policy)
+- ❌ Manual `memo`/`useMemo` without profiling
+- ❌ Class components
+- ❌ CommonJS require/module.exports
+
+## REQUIRED PATTERNS
+
+- ✅ Functional components with hooks
+- ✅ Explicit TypeScript typing
+- ✅ Immutable state updates
+- ✅ Pure render functions
+- ✅ Error boundaries for error handling
+- ✅ Loading states for async operations
+- ✅ Kebab-case file naming
+
+## FILE ORGANIZATION RULES
+
+- Components: `src/renderer/src/components/`
+- Hooks: `src/renderer/src/hooks/`
+- Utilities: `src/renderer/src/lib/`
+- Styles: `src/renderer/src/styles/`
+
+## ACCESSIBILITY PRIORITY
+
+- Phase 1: Core functionality implementation
+- Phase 2: Accessibility features (later iterations)
+- Focus on development efficiency first
+
+  - Pure reducers separated from actions for testability
+  - Atomic selectors with `useShallow` for object selections
+  - Conditional persistence (only necessary state)
+# Renderer Process Development Rules
+
+## MANDATORY COMPONENT PATTERNS
+
+### Component Type Definition
+- ALWAYS use explicit props interface + explicit return type
+- NEVER use React.FC or implicit typing
+- REQUIRED format: `(props: PropsInterface): React.JSX.Element`
+
+```typescript
+// CORRECT
+interface ButtonProps {
+  text: string;
+  onClick: () => void;
+}
+
+const Button = ({ text, onClick }: ButtonProps): React.JSX.Element => {
+  return <button onClick={onClick}>{text}</button>;
+};
+
+// INCORRECT
+const Button: React.FC<ButtonProps> = ({ text, onClick }) => {
+  return <button onClick={onClick}>{text}</button>;
+};
+```
+
+## STATE MANAGEMENT HIERARCHY
+
+### 1. Local Component State
+- Use `useState` for simple state
+- Use `useReducer` for complex state logic
+- Keep state as close to usage as possible
+
+### 2. Feature-Scope State
+- Use React Context for shared state within feature modules
+- Avoid prop drilling beyond 2 levels
+
+### 3. Global App State
+- Use Zustand with slice-based architecture
+- Implement atomic selectors with `useShallow`
+- Use middleware stack: `devtools(persist(subscribeWithSelector(immer())))`
+
+### 4. Main Process Integration
+- Use IPC for main process communication
+- Treat main process data as async source
+- Implement proper loading/error states
+
+## FORBIDDEN PATTERNS
+
+- ❌ `React.FC` usage
+- ❌ Browser localStorage (team policy)
+- ❌ Manual `memo`/`useMemo` without profiling
+- ❌ Class components
+- ❌ CommonJS require/module.exports
+
+## REQUIRED PATTERNS
+
+- ✅ Functional components with hooks
+- ✅ Explicit TypeScript typing
+- ✅ Immutable state updates
+- ✅ Pure render functions
+- ✅ Error boundaries for error handling
+- ✅ Loading states for async operations
+- ✅ Kebab-case file naming
+
+## FILE ORGANIZATION RULES
+
+- Components: `src/renderer/src/components/`
+- Hooks: `src/renderer/src/hooks/`
+- Utilities: `src/renderer/src/lib/`
+- Styles: `src/renderer/src/styles/`
+
+## ACCESSIBILITY PRIORITY
+
+- Phase 1: Core functionality implementation
+- Phase 2: Accessibility features (later iterations)
+- Focus on development efficiency first
+
+  - Pure reducers separated from actions for testability
+  - Atomic selectors with `useShallow` for object selections
+  - Conditional persistence (only necessary state)

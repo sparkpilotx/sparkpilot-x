@@ -1,0 +1,41 @@
+---
+description: code commenting requirements
+alwaysApply: false
+---
+
+- Purpose-first
+  - Explain WHY, trade-offs, and constraints; avoid restating behavior obvious from code or types.
+  - Document invariants, preconditions/postconditions, side effects, and concurrency assumptions.
+
+- Scope & placement
+  - Keep comments close to relevant code.
+  - Use top-level JSDoc for modules/classes/functions; inline block comments for complex logic.
+  - All public APIs must have JSDoc; private members only if non-trivial.
+
+- JSDoc/TSDoc conventions (JS/TS)
+  - Use `/** ... */` with TSDoc tags.
+  - Common tags: `@param`, `@returns`, `@throws`, `@remarks`, `@example`, `@see`, `@deprecated`, `@defaultValue`, `@internal`.
+  - Specify thrown errors with `@throws` and conditions.
+  - Provide minimal runnable or edge-case examples with `@example`.
+
+- Maintenance & hygiene
+  - Update or remove comments when code changes.
+  - No secrets/PII in comments.
+  - For temporary workarounds or technical debt, use:
+    - `// TODO(scope): reason | tracking: URL | deadline: YYYY-MM-DD`
+    - `// HACK: reason | revert-criteria | tracking: URL`
+
+- Style
+  - English only; concise, declarative tone.
+  - Avoid self-evident comments or duplication of type info.
+  - Keep line length ≤ 100 chars.
+
+- Performance & complexity
+  - Note complexity, performance assumptions, and fallback strategies.
+
+- Concurrency & I/O
+  - Indicate concurrency model, atomicity, idempotency, retry/timeout/cancel policies.
+
+- Tooling integration
+  - JSDoc should be compatible with Typedoc/TS Server for API generation.
+  - Critical modules should include a short “design note” describing goals, non-goals, and trade-offs.
