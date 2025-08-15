@@ -1,9 +1,14 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Send, RefreshCw, AlertCircle, CheckCircle, RotateCcw, MessageSquare, Hash, ToggleLeft, List, Code } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
 import { trpc } from '@/lib/trpc';
 
 /**
@@ -33,6 +38,7 @@ interface EchoInput {
  * - Form state management for multiple input types
  * - Data serialization testing
  * - Debugging and testing utilities
+ * - Enhanced UI with shadcn/ui components
  * 
  * @param props - Component properties
  * @returns JSX element with various input controls and echo response display
@@ -83,134 +89,275 @@ const EchoTest = ({ className }: EchoTestProps): React.JSX.Element => {
     }));
   };
 
+  const getInputCount = (): number => {
+    let count = 0;
+    if (inputData.text) count++;
+    if (inputData.number !== undefined) count++;
+    if (inputData.boolean !== undefined) count++;
+    if (arrayInput.trim()) count++;
+    return count;
+  };
+
   return (
-    <div className={`space-y-4 p-6 border rounded-lg ${className || ''}`}>
-      <h3 className="text-lg font-semibold">Echo Test Query</h3>
-      <p className="text-sm text-gray-600 dark:text-gray-400">
-        Test tRPC communication with various data types and complex input structures.
-      </p>
-      
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Text Input */}
-        <div className="space-y-2">
-          <Label htmlFor="text-input">Text Input</Label>
-          <input
-            id="text-input"
-            type="text"
-            value={inputData.text || ''}
-            onChange={(e) => updateInputData('text', e.target.value || undefined)}
-            placeholder="Enter some text"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                     bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                     focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-        
-        {/* Number Input */}
-        <div className="space-y-2">
-          <Label htmlFor="number-input">Number Input</Label>
-          <input
-            id="number-input"
-            type="number"
-            value={inputData.number ?? ''}
-            onChange={(e) => updateInputData('number', e.target.value ? Number(e.target.value) : undefined)}
-            placeholder="Enter a number"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                     bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                     focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-        
-        {/* Boolean Input */}
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="boolean-input"
-            checked={inputData.boolean || false}
-            onCheckedChange={(checked) => updateInputData('boolean', checked === true ? true : undefined)}
-          />
-          <Label htmlFor="boolean-input">Boolean value (checked = true)</Label>
-        </div>
-        
-        {/* Array Input */}
-        <div className="space-y-2">
-          <Label htmlFor="array-input">Array Input</Label>
-          <input
-            id="array-input"
-            type="text"
-            value={arrayInput}
-            onChange={(e) => setArrayInput(e.target.value)}
-            placeholder="Enter comma-separated values"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                     bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                     focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Example: apple, banana, cherry
-          </p>
-        </div>
-        
-        <div className="flex gap-2">
-          <Button 
-            type="submit" 
-            disabled={isLoading}
-            className="flex-1"
-          >
-            {isLoading ? 'Sending...' : 'Test Echo'}
-          </Button>
-          
-          {submittedData && (
-            <Button 
-              type="button" 
-              onClick={() => refetch()}
-              disabled={isLoading}
-              variant="outline"
-            >
-              Refresh
-            </Button>
-          )}
-          
-          <Button 
-            type="button" 
-            onClick={handleReset}
-            variant="outline"
-          >
-            Reset
-          </Button>
-        </div>
-      </form>
-      
-      {error && (
-        <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-red-700 dark:text-red-400">
-          <strong>Error:</strong> {error.message}
-        </div>
-      )}
-      
-      {data && (
-        <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded">
-          <div className="space-y-3">
-            <p className="font-medium text-purple-800 dark:text-purple-200">
-              {data.message}
-            </p>
-            
-            <div className="space-y-2">
-              <h4 className="font-medium text-purple-700 dark:text-purple-300">Echo Response:</h4>
-              <pre className="text-sm bg-purple-100 dark:bg-purple-800/50 p-2 rounded overflow-auto text-purple-800 dark:text-purple-200">
-                {JSON.stringify(data.echo, null, 2)}
-              </pre>
-            </div>
-            
-            <div className="text-sm text-purple-600 dark:text-purple-400 space-y-1">
-              <p><strong>Input Type:</strong> {data.inputType}</p>
-              <p><strong>Has Text:</strong> {data.hasText ? 'Yes' : 'No'}</p>
-              <p><strong>Has Number:</strong> {data.hasNumber ? 'Yes' : 'No'}</p>
-              <p><strong>Has Boolean:</strong> {data.hasBoolean ? 'Yes' : 'No'}</p>
-              <p><strong>Has Array:</strong> {data.hasArray ? 'Yes' : 'No'}</p>
-              <p><strong>Timestamp:</strong> {new Date(data.timestamp).toLocaleString()}</p>
-            </div>
+    <Card className={className}>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-purple-500" />
+              Echo Test Query
+            </CardTitle>
+            <CardDescription>
+              Test tRPC communication with various data types and complex input structures.
+            </CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-xs">
+              {getInputCount()} inputs
+            </Badge>
+            <Badge variant={data ? "default" : "secondary"}>
+              {data ? "Echoed" : "Ready"}
+            </Badge>
           </div>
         </div>
-      )}
-    </div>
+      </CardHeader>
+      
+      <CardContent className="space-y-6">
+        {/* Input Form */}
+        <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Code className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              Input Parameters
+            </CardTitle>
+          </CardHeader>
+          
+          <CardContent className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Text Input */}
+              <div className="space-y-2">
+                <Label htmlFor="text-input" className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  Text Input
+                </Label>
+                <Input
+                  id="text-input"
+                  type="text"
+                  value={inputData.text || ''}
+                  onChange={(e) => updateInputData('text', e.target.value || undefined)}
+                  placeholder="Enter some text to echo back"
+                  className="border-blue-200 focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+              
+              {/* Number Input */}
+              <div className="space-y-2">
+                <Label htmlFor="number-input" className="flex items-center gap-2">
+                  <Hash className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  Number Input
+                </Label>
+                <Input
+                  id="number-input"
+                  type="number"
+                  value={inputData.number ?? ''}
+                  onChange={(e) => updateInputData('number', e.target.value ? Number(e.target.value) : undefined)}
+                  placeholder="Enter a number to echo back"
+                  className="border-blue-200 focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+              
+              {/* Boolean Input */}
+              <div className="flex items-center space-x-3 p-3 rounded-md border border-blue-200 bg-blue-100 dark:border-blue-800 dark:bg-blue-900/30">
+                <Checkbox
+                  id="boolean-input"
+                  checked={inputData.boolean || false}
+                  onCheckedChange={(checked) => updateInputData('boolean', checked === true ? true : undefined)}
+                  className="border-blue-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                />
+                <Label htmlFor="boolean-input" className="flex items-center gap-2 cursor-pointer">
+                  <ToggleLeft className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  Boolean value (checked = true)
+                </Label>
+              </div>
+              
+              {/* Array Input */}
+              <div className="space-y-2">
+                <Label htmlFor="array-input" className="flex items-center gap-2">
+                  <List className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  Array Input
+                </Label>
+                <Input
+                  id="array-input"
+                  type="text"
+                  value={arrayInput}
+                  onChange={(e) => setArrayInput(e.target.value)}
+                  placeholder="Enter comma-separated values (e.g., apple, banana, cherry)"
+                  className="border-blue-200 focus:border-blue-500 focus:ring-blue-500"
+                />
+                <p className="text-xs text-blue-600 dark:text-blue-400">
+                  Values will be split by commas and trimmed
+                </p>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex gap-2 pt-2">
+                <Button 
+                  type="submit" 
+                  disabled={isLoading || getInputCount() === 0}
+                  className="flex-1"
+                >
+                  {isLoading ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="mr-2 h-4 w-4" />
+                      Test Echo
+                    </>
+                  )}
+                </Button>
+                
+                {submittedData && (
+                  <Button 
+                    type="button" 
+                    onClick={() => refetch()}
+                    disabled={isLoading}
+                    variant="outline"
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Refresh
+                  </Button>
+                )}
+                
+                <Button 
+                  type="button" 
+                  onClick={handleReset}
+                  variant="outline"
+                >
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Reset
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+        
+        {/* Error State */}
+        {error && (
+          <Card className="border-destructive/50 bg-destructive/5">
+            <CardContent className="pt-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
+                <div className="space-y-1">
+                  <p className="font-medium text-destructive">Echo Query Error</p>
+                  <p className="text-sm text-destructive/80">{error.message}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {/* Success State */}
+        {data && (
+          <Card className="border-purple-200 bg-purple-50 dark:border-purple-800 dark:bg-purple-950/20">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                <CardTitle className="text-lg text-purple-800 dark:text-purple-200">
+                  {data.message}
+                </CardTitle>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="space-y-4">
+              <Separator className="bg-purple-200 dark:bg-purple-800" />
+              
+              {/* Echo Response */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="text-xs">
+                    <Code className="mr-1 h-3 w-3" />
+                    Echo Response
+                  </Badge>
+                </div>
+                <pre className="text-sm bg-purple-100 dark:bg-purple-800/50 p-3 rounded-md overflow-auto text-purple-800 dark:text-purple-200 border border-purple-200 dark:border-purple-700">
+                  {JSON.stringify(data.echo, null, 2)}
+                </pre>
+              </div>
+              
+              {/* Metadata Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="flex items-center gap-2 p-2 rounded-md bg-purple-100 dark:bg-purple-900/30">
+                  <Badge variant="outline" className="text-xs">
+                    <MessageSquare className="mr-1 h-3 w-3" />
+                    Text
+                  </Badge>
+                  <span className="text-sm font-medium text-purple-800 dark:text-purple-200">
+                    {data.hasText ? 'Yes' : 'No'}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2 p-2 rounded-md bg-purple-100 dark:bg-purple-900/30">
+                  <Badge variant="outline" className="text-xs">
+                    <Hash className="mr-1 h-3 w-3" />
+                    Number
+                  </Badge>
+                  <span className="text-sm font-medium text-purple-800 dark:text-purple-200">
+                    {data.hasNumber ? 'Yes' : 'No'}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2 p-2 rounded-md bg-purple-100 dark:bg-purple-900/30">
+                  <Badge variant="outline" className="text-xs">
+                    <ToggleLeft className="mr-1 h-3 w-3" />
+                    Boolean
+                  </Badge>
+                  <span className="text-sm font-medium text-purple-800 dark:text-purple-200">
+                    {data.hasBoolean ? 'Yes' : 'No'}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2 p-2 rounded-md bg-purple-100 dark:bg-purple-900/30">
+                  <Badge variant="outline" className="text-xs">
+                    <List className="mr-1 h-3 w-3" />
+                    Array
+                  </Badge>
+                  <span className="text-sm font-medium text-purple-800 dark:text-purple-200">
+                    {data.hasArray ? 'Yes' : 'No'}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2 p-2 rounded-md bg-purple-100 dark:bg-purple-900/30">
+                  <Badge variant="outline" className="text-xs">
+                    <Code className="mr-1 h-3 w-3" />
+                    Type
+                  </Badge>
+                  <span className="text-sm font-medium text-purple-800 dark:text-purple-200">
+                    {data.inputType}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2 p-2 rounded-md bg-purple-100 dark:bg-purple-900/30">
+                  <Badge variant="outline" className="text-xs">
+                    <RefreshCw className="mr-1 h-3 w-3" />
+                    Timestamp
+                  </Badge>
+                  <span className="text-sm font-medium text-purple-800 dark:text-purple-200">
+                    {new Date(data.timestamp).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="text-xs text-purple-600 dark:text-purple-400 text-center">
+                Echo query executed successfully • Input validation passed
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
