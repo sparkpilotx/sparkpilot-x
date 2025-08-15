@@ -55,7 +55,7 @@ const createWindow = (): void => {
       ? {
           color: '#00000000',
           symbolColor: '#6B7280', // Tailwind gray-500 for traffic light symbols when applicable
-          height: 40,
+          height: 36, // Optimized for macOS traffic light vertical centering
         }
       : undefined,
     icon: join(__dirname, '../renderer/public/icon.png'), // TODO(assets): Verify icon path in production build
@@ -165,7 +165,7 @@ app.on('window-all-closed', () => {
 });
 
 // Security: Prevent unauthorized navigation and redirect to external browser
-app.on('web-contents-created', (event, contents) => {
+app.on('web-contents-created', (_event, contents) => {
   contents.on('will-navigate', (event, navigationUrl) => {
     event.preventDefault();
     shell.openExternal(navigationUrl);

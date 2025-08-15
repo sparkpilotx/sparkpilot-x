@@ -31,7 +31,7 @@ export const WindowTitlebar = ({ title }: WindowTitlebarProps): React.JSX.Elemen
         'border-b border-border'
       )}
     >
-      <div className={cn('h-full w-full flex items-center gap-2 px-2')}
+      <div className={cn('h-full w-full flex items-center gap-1 px-1')}
         /* Left spacer for macOS traffic lights; adjust to 72px typical inset */
       >
         <div className={cn('w-[72px] shrink-0')} />
@@ -40,7 +40,7 @@ export const WindowTitlebar = ({ title }: WindowTitlebarProps): React.JSX.Elemen
         <div className={cn('text-sm text-foreground/80 truncate')}>{text}</div>
 
         {/* Right-side actions must be no-drag to allow interaction */}
-        <div className={cn('ml-auto flex items-center gap-1 win-no-drag')}>
+        <div className={cn('ml-auto flex items-center gap-0.5 win-no-drag')}>
           {/* Theme Toggle
            * Cycles through light, dark, and system theme preferences
            * Shows current theme icon and provides helpful tooltip
@@ -49,17 +49,17 @@ export const WindowTitlebar = ({ title }: WindowTitlebarProps): React.JSX.Elemen
           <ThemeToggle
             theme={currentTheme}
             onThemeChange={handleThemeChange}
-            className="h-8 w-8"
+            className="h-6 w-6"
           />
           
           {/* Settings Button
            * Provides quick access to application settings and preferences
            * Styled as ghost variant for subtle appearance in title bar
-           * Uses icon size (h-8 w-8) to maintain compact title bar height
+           * Uses compact size (h-6 w-6) to maintain VSCode-like compactness
            * Includes screen reader text for accessibility compliance
            * Currently logs to console - TODO: implement actual settings modal/page
            */}
-          <SettingsButton className="h-8 w-8" />
+          <SettingsButton className="h-6 w-6" />
         </div>
       </div>
     </header>
