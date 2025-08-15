@@ -1,25 +1,6 @@
 import HelloQuerySamplesContainer from './hello-query';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { 
-  Layers, 
-  Code, 
-  Zap, 
-  Shield, 
-  Clock, 
-  ExternalLink, 
-  ArrowRight, 
-  Sparkles, 
-  Monitor, 
-  Database,
-  GitBranch,
-  Rocket,
-  BookOpen,
-  Terminal,
-  Settings,
-  RefreshCw
-} from 'lucide-react';
+import HelloMutationSamplesContainer from './hello-mutation';
+import HelloSubscriptionSamplesContainer from './hello-subscription';
 
 /**
  * Properties for the SamplesContainer component.
@@ -50,6 +31,16 @@ const SamplesContainer = ({ className }: SamplesContainerProps): React.JSX.Eleme
         {/* Hello Query Router Samples */}
         <section>
           <HelloQuerySamplesContainer />
+        </section>
+
+        {/* Hello Mutation Router Samples */}
+        <section>
+          <HelloMutationSamplesContainer />
+        </section>
+
+        {/* Hello Subscription Router Samples */}
+        <section>
+          <HelloSubscriptionSamplesContainer />
         </section>
 
         {/* Future Router Placeholders */}
