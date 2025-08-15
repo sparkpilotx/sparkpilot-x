@@ -2,13 +2,14 @@
  * Sample components for demonstrating tRPC v11 functionality.
  * 
  * This module exports all sample components that showcase various tRPC features
- * and patterns for Electron applications.
+ * and patterns for Electron applications, organized by router.
  */
 
-export { default as BasicHello } from './basic-hello';
-export { default as HelloWithName } from './hello-with-name';
-export { default as EchoTest } from './echo-test';
+// Export hello-query router components and container
+export * from './hello-query';
+
+// Export main samples container that organizes all router samples
 export { default as SamplesContainer } from './samples-container';
 
-// Export a convenient default that includes all samples
+// Export a convenient default that includes all router samples
 export { default } from './samples-container';
