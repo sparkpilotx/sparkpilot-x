@@ -11,6 +11,8 @@ export * from './hello-query';
 export * from './hello-mutation';
 // Export hello-subscription router components and container
 export * from './hello-subscription';
+// Export ideas router components and container
+export * from './ideas';
 
 // Export main samples container that organizes all router samples
 export { default as SamplesContainer } from './samples-container';

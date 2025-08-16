@@ -1,6 +1,7 @@
 import HelloQuerySamplesContainer from './hello-query';
 import HelloMutationSamplesContainer from './hello-mutation';
 import HelloSubscriptionSamplesContainer from './hello-subscription';
+import IdeasSamplesContainer from './ideas';
 
 /**
  * Properties for the SamplesContainer component.
@@ -44,6 +45,9 @@ const SamplesContainer = ({ className }: SamplesContainerProps): React.JSX.Eleme
         </section>
 
         {/* Future Router Placeholders */}
+        <section>
+          <IdeasSamplesContainer />
+        </section>
       </div>
     </div>
   );
