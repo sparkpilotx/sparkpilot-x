@@ -1,4 +1,5 @@
 import type { CreateHTTPContextOptions } from '@trpc/server/adapters/standalone';
+import { prisma } from '@shared/prisma';
 
 /**
  * Inner context: request-independent resources that are always available to procedures.
@@ -13,7 +14,7 @@ import type { CreateHTTPContextOptions } from '@trpc/server/adapters/standalone'
  * making it ideal for expensive operations and shared resources.
  */
 export async function createContextInner() {
-  return {} as const;
+  return { prisma } as const;
 }
 
 /**

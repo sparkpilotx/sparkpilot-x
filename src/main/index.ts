@@ -5,6 +5,7 @@ import { is, platform } from '@electron-toolkit/utils';
 
 import { registerIpcHandlers, unregisterIpcHandlers } from './ipc-handlers';
 import { startTrpcServer, stopTrpcServer } from './trpc/server';
+import { ensureDatabaseConnection } from './shared/prisma';
 
 /**
  * Main process entry point for SparkPilot-X
@@ -334,6 +335,11 @@ app.whenReady().then(() => {
   if (platform.isMacOS) {
     app.dock?.hide();
   }
+
+  // Ensure DB is reachable before starting server
+  ensureDatabaseConnection().catch((error) => {
+    console.error('[DB] Connection check failed:', error);
+  });
 
   // Start tRPC server before creating the window
   // This enables type-safe API communication between main and renderer processes

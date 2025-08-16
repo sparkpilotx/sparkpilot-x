@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { RefreshCw, CheckCircle, AlertCircle, Clock, Zap, Monitor } from 'lucide-react';
+import { RefreshCw, CheckCircle, AlertCircle, Clock, Zap, Monitor, Activity, Database } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,6 +37,23 @@ const BasicHello = ({ className }: BasicHelloProps): React.JSX.Element => {
     refetch,
     isRefetching,
   } = useQuery(trpc.samples.helloQuery.hello.queryOptions());
+
+  // Minimal DB health test via tRPC health endpoint
+  const {
+    data: healthData,
+    isLoading: isHealthLoading,
+    error: healthError,
+    refetch: refetchHealth,
+    isRefetching: isHealthRefetching,
+  } = useQuery(
+    trpc.health.db.queryOptions(
+      undefined,
+      {
+        // keep health checks lightweight; don't auto-refetch often
+        staleTime: 5_000,
+      }
+    )
+  );
 
   return (
     <Card className={cn("h-full", className)}>
@@ -159,6 +176,49 @@ const BasicHello = ({ className }: BasicHelloProps): React.JSX.Element => {
             </CardContent>
           </Card>
         )}
+
+        {/* Minimal DB Health Test */}
+        <Card className="border-blue-200 bg-blue-50 dark:border-blue-800/40 dark:bg-blue-950/20">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <CardTitle className="text-lg">Database Health</CardTitle>
+              </div>
+              <Badge variant={healthData?.ok ? "default" : healthError ? "destructive" : "secondary"} className="text-xs px-3 py-1">
+                {healthData?.ok ? `OK • ${healthData.durationMs}ms` : healthError ? 'Error' : 'Unknown'}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={() => refetchHealth()}
+                disabled={isHealthLoading || isHealthRefetching}
+                className="h-10"
+                variant="outline"
+              >
+                {isHealthLoading || isHealthRefetching ? (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    Checking...
+                  </>
+                ) : (
+                  <>
+                    <Database className="mr-2 h-4 w-4" />
+                    Test DB Connection
+                  </>
+                )}
+              </Button>
+              {healthError && (
+                <div className="flex items-center gap-2 text-destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="text-sm truncate max-w-[320px]">{healthError.message}</span>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
         
         {/* Loading State */}
         {isLoading && !data && (

@@ -3,6 +3,8 @@ directories:
   buildResources: build
 asarUnpack:
   - resources/**
+  # Unpack Prisma query engine libraries for production builds
+  - node_modules/@prisma/engines/**
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   icon: src/renderer/public/logo/icon-logo.icns
@@ -23,6 +25,9 @@ npmRebuild: false
 extraResources:
   - from: src/renderer/public/logo
     to: logo
+  # Bundle Prisma engines for runtime
+  - from: node_modules/@prisma/engines
+    to: @prisma/engines
 # publish:
 #   provider: generic
 #   url: https://example.com/auto-updates

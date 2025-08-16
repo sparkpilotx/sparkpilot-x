@@ -27,7 +27,13 @@ export const helloQueryRouter = createTRPCRouter({
    * ```
    */
   hello: publicProcedure
-    .query(async () => {
+    .query(async ({ ctx }) => {
+      // Touch DB to demonstrate Prisma availability (no-op if DB offline)
+      try {
+        await ctx.prisma.$queryRaw`SELECT 1`;
+      } catch {
+        // ignore in sample
+      }
       return {
         message: 'Hello from tRPC v11!',
         timestamp: new Date(),
