@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { SettingsButton } from '@/components/ui/settings-button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useTheme } from '@/hooks/use-theme';
+import logo from '/logo/256x256.png';
 
 export interface WindowTitleBarProps {
   /** Optional title text; defaults to VITE_APP_NAME for consistency across windows */
@@ -24,10 +25,17 @@ export const WindowTitleBar = ({ title }: WindowTitleBarProps): React.JSX.Elemen
         'border-b border-border'
       )}
     >
-      <div className={cn('h-full w-full flex items-center gap-1 px-1')}
+      <div className={cn('h-full w-full flex items-center gap-2 px-1')}
         /* Left spacer for macOS traffic lights; adjust to 72px typical inset */
       >
         <div className={cn('w-[72px] shrink-0')} />
+
+        <img
+          src={logo}
+          alt="App logo"
+          className={cn('h-4 w-4 rounded-sm opacity-80')}
+          draggable={false}
+        />
 
         {/* Title text sits in draggable area but is non-interactive */}
         <div className={cn('text-sm text-foreground/80 truncate')}>{text}</div>

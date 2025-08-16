@@ -1,5 +1,5 @@
 import { app, BrowserWindow, screen } from 'electron/main';
-import { shell } from 'electron/common';
+import { shell, nativeImage } from 'electron/common';
 import { join } from 'path';
 import { is, platform } from '@electron-toolkit/utils';
 
@@ -119,7 +119,7 @@ const createWindow = (): void => {
           height: 36, // Optimized for macOS traffic light vertical centering
         }
       : undefined,
-    icon: join(__dirname, '../renderer/public/icon.png'), // TODO(assets): Verify icon path in production build
+    icon: join(__dirname, '../renderer/public/logo/512x512.png'),
     backgroundColor: '#ffffff',
     transparent: false,
     frame: true,
@@ -226,6 +226,16 @@ if (hasSingleInstanceLock) {
  * conventions for single-window applications.
  */
 app.whenReady().then(() => {
+  // Set macOS dock icon explicitly for development and production
+  if (platform.isMacOS) {
+    const dockIcon = nativeImage.createFromPath(
+      join(__dirname, '../renderer/public/logo/512x512.png')
+    );
+    if (!dockIcon.isEmpty()) {
+      app.dock?.setIcon(dockIcon);
+    }
+  }
+
   // Start tRPC server before creating the window
   // This enables type-safe API communication between main and renderer processes
   startTrpcServer();
