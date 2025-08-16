@@ -22,6 +22,19 @@ import { startTrpcServer, stopTrpcServer } from './trpc/server';
 let mainWindow: BrowserWindow | null = null;
 
 /**
+ * Enforce single-instance application behavior
+ *
+ * If another instance is launched, focus the existing window instead of creating a new one.
+ */
+const hasSingleInstanceLock = app.requestSingleInstanceLock();
+
+if (!hasSingleInstanceLock) {
+  app.quit();
+  // Ensure process exits on all platforms
+  process.exit(0);
+}
+
+/**
  * Creates and configures the main application window with security-first settings
  * 
  * @remarks
@@ -186,6 +199,23 @@ const createWindow = (): void => {
     mainWindow = null;
   });
 };
+
+// Handle attempts to launch a second instance by focusing existing window
+if (hasSingleInstanceLock) {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+      if (!mainWindow.isVisible()) {
+        mainWindow.show();
+      }
+      mainWindow.focus();
+    } else {
+      createWindow();
+    }
+  });
+}
 
 /**
  * Application lifecycle event handlers
