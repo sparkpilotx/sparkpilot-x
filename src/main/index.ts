@@ -1,6 +1,6 @@
 import { app, BrowserWindow, screen } from 'electron/main';
 import { shell, nativeImage } from 'electron/common';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { is, platform } from '@electron-toolkit/utils';
 
 import { registerIpcHandlers, unregisterIpcHandlers } from './ipc-handlers';
@@ -228,9 +228,10 @@ if (hasSingleInstanceLock) {
 app.whenReady().then(() => {
   // Set macOS dock icon explicitly for development and production
   if (platform.isMacOS) {
-    const dockIcon = nativeImage.createFromPath(
-      join(__dirname, '../renderer/public/logo/512x512.png')
-    );
+    const dockIconPath = app.isPackaged
+      ? join(process.resourcesPath, 'logo/512x512.png')
+      : resolve('src/renderer/public/logo/512x512.png');
+    const dockIcon = nativeImage.createFromPath(dockIconPath);
     if (!dockIcon.isEmpty()) {
       app.dock?.setIcon(dockIcon);
     }
