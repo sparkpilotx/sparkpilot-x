@@ -23,11 +23,11 @@ dmg:
   sign: false
 npmRebuild: false
 extraResources:
-  - from: src/renderer/public/logo
-    to: logo
+  - from: "src/renderer/public/logo"
+    to: "logo"
   # Bundle Prisma engines for runtime
-  - from: node_modules/@prisma/engines
-    to: @prisma/engines
+  - from: "node_modules/@prisma/engines"
+    to: "@prisma/engines"
 # publish:
 #   provider: generic
 #   url: https://example.com/auto-updates
