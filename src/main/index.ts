@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen } from 'electron/main';
+import { app, BrowserWindow, Menu, Tray, screen } from 'electron/main';
 import { shell, nativeImage } from 'electron/common';
 import { join, resolve } from 'path';
 import { is, platform } from '@electron-toolkit/utils';
@@ -20,6 +20,8 @@ import { startTrpcServer, stopTrpcServer } from './trpc/server';
 
 /** Main application window reference - prevents garbage collection */
 let mainWindow: BrowserWindow | null = null;
+/** System tray reference - must be kept to prevent GC */
+let appTray: Tray | null = null;
 
 /**
  * Enforce single-instance application behavior
@@ -183,10 +185,7 @@ const createWindow = (): void => {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
   }
 
-  // Prevent visual flash by showing only when content is ready
-  mainWindow.once('ready-to-show', () => {
-    mainWindow?.show();
-  });
+  // Do not show on startup; visibility is controlled via the system tray
 
   // Security: External links open in default browser, not new windows
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -200,6 +199,110 @@ const createWindow = (): void => {
   });
 };
 
+/**
+ * Build the system tray context menu with actions reflecting current window state
+ */
+const buildTrayMenu = (): Electron.Menu => {
+  const isWindowVisible = !!mainWindow && mainWindow.isVisible();
+  const isAlwaysOnTop = !!mainWindow && mainWindow.isAlwaysOnTop();
+
+  return Menu.buildFromTemplate([
+    {
+      label: isWindowVisible ? 'Hide Window' : 'Show Window',
+      click: () => {
+        if (!mainWindow) {
+          createWindow();
+          return;
+        }
+        if (mainWindow.isMinimized()) {
+          mainWindow.restore();
+        }
+        if (isWindowVisible) {
+          mainWindow.hide();
+        } else {
+          mainWindow.show();
+          mainWindow.focus();
+        }
+        // Refresh menu to reflect new visibility state
+        appTray?.setContextMenu(buildTrayMenu());
+      },
+    },
+    {
+      type: 'checkbox',
+      label: 'Always on Top',
+      checked: isAlwaysOnTop,
+      click: () => {
+        if (!mainWindow) {
+          createWindow();
+        }
+        mainWindow?.setAlwaysOnTop(!isAlwaysOnTop);
+        appTray?.setContextMenu(buildTrayMenu());
+      },
+    },
+    { type: 'separator' },
+    {
+      label: 'Quit',
+      click: () => {
+        app.quit();
+      },
+    },
+  ]);
+};
+
+/**
+ * Create system tray with appropriate icon and context menu
+ */
+const createTray = (): void => {
+  // Resolve icon path per environment/platform
+  const getTrayIconPath = (): string => {
+    if (platform.isMacOS) {
+      return app.isPackaged
+        ? join(process.resourcesPath, 'logo/512x512.png')
+        : resolve('src/renderer/public/logo/512x512.png');
+    }
+    // Prefer .ico on Windows, PNG elsewhere
+    if (platform.isWindows) {
+      return app.isPackaged
+        ? join(process.resourcesPath, 'logo/icon-logo.ico')
+        : resolve('src/renderer/public/logo/icon-logo.ico');
+    }
+    return app.isPackaged
+      ? join(process.resourcesPath, 'logo/256x256.png')
+      : resolve('src/renderer/public/logo/256x256.png');
+  };
+
+  const iconPath = getTrayIconPath();
+  let trayImage = nativeImage.createFromPath(iconPath);
+
+  // Resize for macOS status bar and mark as template for auto-tinting
+  if (platform.isMacOS) {
+    trayImage = trayImage.resize({ width: 16, height: 16 });
+    trayImage.setTemplateImage(true);
+  }
+
+  appTray = new Tray(trayImage);
+  appTray.setToolTip(app.getName());
+  appTray.setContextMenu(buildTrayMenu());
+
+  // Clicking the tray icon toggles visibility
+  appTray.on('click', () => {
+    if (!mainWindow) {
+      createWindow();
+      return;
+    }
+    if (mainWindow.isVisible()) {
+      mainWindow.hide();
+    } else {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+      mainWindow.show();
+      mainWindow.focus();
+    }
+    appTray?.setContextMenu(buildTrayMenu());
+  });
+};
+
 // Handle attempts to launch a second instance by focusing existing window
 if (hasSingleInstanceLock) {
   app.on('second-instance', () => {
@@ -207,11 +310,12 @@ if (hasSingleInstanceLock) {
       if (mainWindow.isMinimized()) {
         mainWindow.restore();
       }
-      if (!mainWindow.isVisible()) {
-        mainWindow.show();
+      // Do not show the window automatically; only show via tray
+      if (mainWindow.isVisible()) {
+        mainWindow.focus();
       }
-      mainWindow.focus();
     } else {
+      // Ensure window exists but stays hidden
       createWindow();
     }
   });
@@ -226,15 +330,9 @@ if (hasSingleInstanceLock) {
  * conventions for single-window applications.
  */
 app.whenReady().then(() => {
-  // Set macOS dock icon explicitly for development and production
+  // macOS: hide Dock to run as tray-only app
   if (platform.isMacOS) {
-    const dockIconPath = app.isPackaged
-      ? join(process.resourcesPath, 'logo/512x512.png')
-      : resolve('src/renderer/public/logo/512x512.png');
-    const dockIcon = nativeImage.createFromPath(dockIconPath);
-    if (!dockIcon.isEmpty()) {
-      app.dock?.setIcon(dockIcon);
-    }
+    app.dock?.hide();
   }
 
   // Start tRPC server before creating the window
@@ -244,19 +342,17 @@ app.whenReady().then(() => {
   // Register IPC handlers before creating the window
   registerIpcHandlers();
   
+  // Create system tray
+  createTray();
+
   createWindow();
 
-  // macOS: Re-create window when dock icon is clicked
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
-  });
+  // Do not auto-show or create window on dock activation; tray controls visibility
 });
 
 // Platform-specific quit behavior: quit on non-macOS when all windows close
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+  if (!platform.isMacOS) {
     app.quit();
   }
 });
@@ -265,6 +361,8 @@ app.on('window-all-closed', () => {
 app.on('before-quit', async () => {
   unregisterIpcHandlers();
   await stopTrpcServer();
+  appTray?.destroy();
+  appTray = null;
 });
 
 // Security: Prevent unauthorized navigation and redirect to external browser
