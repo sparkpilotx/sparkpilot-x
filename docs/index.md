@@ -88,3 +88,11 @@ and ensure the code remains maintainable and scalable as the project grows.
 - Keep identifiers, comments, and docs **English-only**. Filenames **kebab-case**.
 - Prefer pure functions, explicit return types, and narrow IPC/preload surfaces.
 - Don’t introduce new libraries without prior approval; prefer extending existing stack.
+
+---
+
+# Render-wide Essentials
+
+Rules that for renderer with glob: `src/renderer/**/*.ts,src/renderer/**/*.tsx`
+
+@renderer-wide-essentials.md
