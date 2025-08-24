@@ -1,0 +1,22 @@
+{
+  "contextFileName": [
+    "docs/index.md"
+  ],
+  "fileFiltering": {
+    "respectGitIgnore": true,
+    "enableRecursiveFileSearch": true
+  },
+  "checkpointing": {
+    "enabled": true
+  },
+  "excludedProjectEnvVars": [
+    "DEBUG",
+    "DEBUG_MODE",
+    "NODE_ENV"
+  ],
+  "allowMCPServers": [
+    "time"
+  ],
+  "toolDiscoveryCommand": ".gemini/bin/get_tools.sh",
+  "toolCallCommand": ".gemini/bin/call_tools.sh"
+}

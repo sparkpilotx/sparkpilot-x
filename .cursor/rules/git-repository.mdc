@@ -1,0 +1,42 @@
+---
+description: Helpful for git and gh
+alwaysApply: false
+---
+
+Enable proxy to github via `proxy http`.
+GitHub cli `gh` has been well configured.
+
+## Git Workflow Quality Gates
+
+Before any `git commit` or `git push`, the following checks MUST pass at the repository root. Commands are defined in [package.json](mdc:package.json).
+
+1. Type check must succeed
+   - Run: `npm run typecheck`
+   - Requirement: Exit code 0, no TypeScript errors
+
+2. Formatting must be clean
+   - Run: `npm run format:check`
+   - If it fails, auto-fix with `npm run format`, re-stage changes, and re-run `format:check`
+
+3. Linting must pass
+   - Run: `npm run lint`
+   - Requirement: Exit code 0, no ESLint errors or warnings
+   - If it fails, try `npm run lint:fix`, re-stage changes, and re-run `lint`
+
+4. App must build
+   - Run: `npm run build`
+   - Requirement: Exit code 0
+
+Additional guidance:
+- If lint fails, prefer `npm run lint:fix` to auto-fix trivial issues, then re-stage and re-run checks.
+- Do not commit artifacts in `dist/`, `out/`, `build/`, or `release/` (already ignored via [.gitignore](mdc:.gitignore)).
+- Before any GitHub network operation (clone/fetch/pull/push), ensure local proxy is on: `proxy http`.
+
+### One-shot check before committing
+
+```bash
+npm run typecheck && npm run format:check && npm run lint && npm run build
+```
+
+If any step fails, do not proceed with the commit or push. Fix the issues and re-run the checks.
+

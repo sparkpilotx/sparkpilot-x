@@ -1,0 +1,40 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+
+Core files
+- @.gemini/settings.json
+- @.gemini/bin/get_tools.sh
+- @.gemini/bin/call_tools.sh
+
+refer to "toolDiscoveryCommand" and "toolCallCommand" in `https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/configuration.md`
+
+Each tool should have a single folder under .gemini/bin/tools/{your-tool-name}
+New tool must follow the current tool organization for modularity and scalability
+
+**language choices for concret tool**
+
+**Language selection strategy:**
+
+- If user doesn't specify language, proactively choose the most suitable language for the task:
+  - **Shell script**: for simple system commands, file operations, basic text processing
+  - **Python**: for complex logic, data processing, web APIs, mathematical computations, JSON/XML handling
+  - **TypeScript**: for structured data handling, modern async operations, type safety requirements
+
+**Implementation guidelines:**
+
+- default use shell script (simplest for basic operations)
+  - follow the shell script tool example in `docs/gemini-cli-tools-samples/calculator-shell-as-sample`
+- if with python, use `uv` and python version >= 3.11
+  - always use `uv run` rather than active environments mannually
+  - follow the python tool example in `docs/gemini-cli-tools-samples/calculator-python-as-sample`
+- if with typescript, use `deno` and fixed typescript viersion 5.8.3
+  - follow the typescript tool example in `docs/gemini-cli-tools-samples/calculator-typescript-as-sample`
+
+references:
+
+- refer to "toolDiscoveryCommand" and "toolCallCommand" from `https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/configuration.md`
+
+- if with python, web_fetch from https://docs.astral.sh/uv/guides/projects/#creating-a-new-project

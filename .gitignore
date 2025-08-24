@@ -1,0 +1,76 @@
+#############################################
+# SparkPilot-X | Electron + Vite + React + TS
+#############################################
+
+## Dependencies / Package managers
+node_modules/
+
+## Build outputs & packaging
+dist/
+out/
+build/
+release/
+*.asar
+
+## Caches (Vite, bundlers, tools)
+.vite/
+.cache/
+.esbuild/
+.turbo/
+.eslintcache
+.prettier-cache
+
+## TypeScript
+*.tsbuildinfo
+
+## Tests / coverage
+coverage/
+.nyc_output/
+
+## Logs & PID files
+logs/
+*.log
+npm-debug.log*
+pids/
+*.pid
+*.pid.lock
+
+## Environment files
+.env
+.env.*
+!.env.example
+
+## IDE / Editor
+.idea/
+.history/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+
+## OS cruft
+.DS_Store
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+## Misc
+*.orig
+
+## uv / Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage*
+
+## Deno
+.deno/
+vendor/
+
+## Project-specific generated assets
+
+
