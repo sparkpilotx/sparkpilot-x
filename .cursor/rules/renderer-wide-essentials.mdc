@@ -1,6 +1,235 @@
 ---
-globs: src/renderer/**/*.ts,src/renderer/**/*.tsx
 description: Renderer-layer conventions for React 19 + TS 5.8. Complements solution-wide essentials without conflict.
+globs: src/renderer/**/*.*
+alwaysApply: false
 ---
+## Purpose & Scope
 
-@docs/renderer-wide-essentials.md
+This rule applies to the renderer layer (React + Tailwind) and complements
+`solution-wide-essentials.mdc`.
+If there is any overlap, the solution-wide rule takes precedence. These
+guidelines focus on React 19 + TypeScript 5.8 usage, component structure,
+state patterns with Zustand, and safe IPC consumption via services.
+
+References:
+- Entry: `src/renderer/index.tsx`
+- App root: `src/renderer/src/App.tsx`
+- Classname helper: `src/renderer/src/lib/cn.ts`
+- Styles baseline: `src/renderer/src/globals.css`
+- Preload types: `src/preload/index.d.ts`
+
+## Component typing
+
+- Prefer explicit props and explicit return types over React.FC.
+  - Do:
+    ```ts
+    type Props = { title: string; children?: React.ReactNode };
+    const Header = ({ title, children }: Props): React.JSX.Element => (
+      <header>
+        <h1>{title}</h1>
+        {children}
+      </header>
+    );
+    ```
+  - Avoid:
+    ```ts
+    const Header: React.FC<{ title: string }> = (props) => { /* ... */ };
+    ```
+
+- Only accept `children` when needed. Declare it explicitly as `React.ReactNode`.
+
+- Event handlers: use built-in React types, not `any`.
+  - Example: `onClick?: React.MouseEventHandler<HTMLButtonElement>`
+
+- Prefer `unknown` at boundaries over `any`; narrow or validate before use.
+
+- Do not annotate trivially inferred generics (e.g., `useState(0)`), but do
+  annotate refs when starting at `null` (e.g., `useRef<HTMLDivElement | null>(null)`).
+
+## Files, naming, and imports
+
+- File extensions: components in `.tsx`, utilities in `.ts`.
+- Filenames:
+  - Use kebab-case filenames across the renderer.
+  - Single exception: `src/renderer/src/App.tsx` remains `PascalCase`.
+- Naming (exports):
+  - Components: exported names use `PascalCase` (file uses kebab-case, e.g., `user-card.tsx` exporting `UserCard`).
+  - Hooks: exported names use `useVerbNoun` (file uses kebab-case, e.g., `use-theme.ts` exporting `useTheme`).
+  - Stores: exported names use `useNounStore` (file uses kebab-case, e.g., `use-sidebar-store.ts` exporting `useSidebarStore`).
+- Directory placement:
+  - UI primitives in `src/renderer/src/components/ui/`.
+  - Layout components in `src/renderer/src/components/layout/`.
+  - Feature/compound components under `src/renderer/src/components/feature-name/`.
+- Imports:
+  - Use type-only imports where applicable: `import type { Foo } from "..."`.
+  - Do not import React just for JSX: no `import React from "react"`.
+  - Prefer explicit imports over deep barrel-chains for clarity and tree-shaking.
+
+### Consistent component exports (React Fast Refresh)
+
+- Always export one React component per file as the default export. Do not mix non-component exports in the same file. This keeps Vite React Fast Refresh stable and avoids full page reloads. See: [Vite plugin react – Consistent components exports](https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports).
+- Entry files (that call `createRoot(...).render(...)`) must not export components; they only import and render them.
+- Co-locate helpers/constants in separate files; import them into the component if needed.
+
+Do:
+
+```ts
+// src/renderer/src/components/user-card.tsx
+type Props = { name: string }
+export default function UserCard({ name }: Props): React.JSX.Element {
+  return <div className="user-card">{name}</div>
+}
+```
+
+```ts
+// src/renderer/user-card-entry.tsx (entry only)
+import { createRoot } from 'react-dom/client'
+import { StrictMode } from 'react'
+import UserCard from './src/components/user-card'
+
+const container = document.getElementById('root')!
+createRoot(container).render(
+  <StrictMode>
+    <UserCard name="Alice" />
+  </StrictMode>,
+)
+```
+
+Avoid:
+
+```ts
+// src/renderer/src/components/user-card.tsx
+export const IS_DEV = import.meta.env.DEV // ❌ non-component export here breaks Fast Refresh
+export function helper() {/* ... */}
+export default function UserCard() {/* ... */}
+```
+
+## Hooks (UI-only, no I/O)
+
+- Custom hooks encapsulate UI behavior, composition, and memoization.
+  - No direct side-effects outside the UI realm (network/IPC/filesystem) here.
+  - Keep side-effectful work out of hooks; delegate to services or higher layers.
+
+- `useEffect` discipline:
+  - Include all used dependencies.
+  - Cleanup subscriptions/timeouts in the return function.
+  - Avoid async `useEffect` directly; create an inner async function and call it.
+  - Prefer deriving state from props/inputs over effectful syncing.
+
+- `useMemo`/`useCallback`:
+  - Use sparingly to stabilize identities or optimize expensive calculations.
+  - Memoize stable event handlers passed to deep trees to avoid re-renders.
+
+## Zustand stores (pure state only)
+
+- Stores live under `src/renderer/src/store/` and must be pure state containers.
+  - No I/O, timers, or IPC in store initializers or actions.
+  - Mutations can use Immer for ergonomics when needed.
+
+- Shape and selectors:
+  - Export minimal, focused selectors to reduce re-renders.
+  - Prefer `shallow` equality for multi-field selectors when appropriate.
+  - Name actions with clear verbs (e.g., `setTheme`, `toggleSidebar`).
+
+- Ephemeral UI state (hover, small toggles) should stay local in components
+  unless shared across distant branches.
+
+## Services & IPC (the only place to touch window.api)
+
+- All IPC calls must be encapsulated in `src/renderer/src/services/`.
+  - The renderer must not call `window.api` directly from components, hooks,
+    or stores. Instead, call a service function.
+  - Service inputs/outputs should be fully typed using the contracts declared in
+    `src/preload/index.d.ts`.
+
+- API design:
+  - Accept an optional `AbortSignal` for cancellable operations.
+  - Normalize and map low-level errors to renderer-friendly errors.
+  - Never leak raw IPC channel names/types into component code.
+
+## Styling with Tailwind
+
+- Use Tailwind classes for layout and design; avoid inline styles unless necessary.
+- Compose class names with the `cn` helper: see
+  `src/renderer/src/lib/cn.ts`.
+- Prefer `data-*` attributes and variant-driven utilities for stateful styling.
+- Keep base styles and tokens in
+  `src/renderer/src/globals.css`.
+
+## Components: Radix UI + Tailwind v4 (native UX)
+
+- Principles:
+  - Build components directly with Tailwind v4 (`globals.css`) and `@radix-ui/*` primitives.
+  - Do not use shadcn or any external component kits/generators.
+  - Aim for native desktop UX within Electron: platform-appropriate spacing, focus, selection, context menus, and keyboard interactions. Avoid web-only patterns.
+
+- Typing & forwardRef pattern:
+  - Prefer explicit props + return types with `forwardRef`.
+    ```ts
+    import { forwardRef } from "react";
+    import { Slot } from "@radix-ui/react-slot";
+    import { cn } from "@/lib/cn";
+
+    type ButtonProps = React.ComponentPropsWithoutRef<"button"> & {
+      variant?: "default" | "destructive" | "ghost";
+      asChild?: boolean;
+    };
+
+    export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+      function Button({ className, variant = "default", asChild, ...props }, ref) {
+        const Comp = asChild ? Slot : "button";
+        return (
+          <Comp
+            ref={ref}
+            data-variant={variant}
+            className={cn(
+              "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium",
+              className
+            )}
+            {...props}
+          />
+        );
+      }
+    );
+    ```
+  - Set `displayName` if helpful for devtools: `Button.displayName = "Button"`.
+
+- Polymorphism with `asChild` (optional):
+  - Use `@radix-ui/react-slot`'s `Slot` for polymorphic composition when needed.
+  - Keep `asChild` optional and default to the intrinsic element.
+
+- Variants:
+  - Prefer `class-variance-authority` (CVA) or `tailwind-variants` for typed variants. Co-locate definitions with the component.
+
+- Class composition:
+  - Always use `cn` to merge classes and conditionals; do not hand-roll joins.
+
+- Icons:
+  - Use the configured `lucide` library; import from `lucide-react` in components.
+
+- Tailwind v4 notes:
+  - Ensure `globals.css` imports Tailwind: `@import "tailwindcss";` and any needed layer directives.
+  - Prefer CSS variables/tokens and `data-*` attributes for theme-aware styles.
+
+- Accessibility:
+  - Honor ARIA and keyboard interactions of composed primitives (e.g., with
+    Radix UI components). Mirror state via `data-*` attributes for styling.
+
+## Accessibility & semantics
+
+- Use semantic HTML elements (`button`, `nav`, `main`, etc.).
+- Provide proper `aria-*` attributes for interactive components.
+- Ensure keyboard operability (focus, Enter/Space activation, focus traps as needed).
+
+## Performance
+
+- Avoid unnecessary re-renders by using selectors and memoized props.
+- Virtualize long lists; debounce rapid user inputs when appropriate.
+- Defer expensive work off the critical path; split large feature bundles when feasible.
+
+## Do not conflict with solution-wide rules
+
+- Respect layering: Renderer → Preload → Main. Reverse imports are forbidden.
+- Side effects belong only in `services/` (renderer) or `main/`.
+- Input validation at process boundaries is enforced in Preload; the renderer
+  should rely on typed contracts and perform only UI-level guards.

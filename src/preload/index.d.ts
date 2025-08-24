@@ -1,8 +1,7 @@
-import type { RuntimeVersions } from '@shared/types/runtime'
+import type { RuntimeVersions } from '@shared/types'
 
 export type XApi = {
   system: {
-    ping: () => string
     versions: () => RuntimeVersions
   }
 }

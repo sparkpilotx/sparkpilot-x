@@ -60,6 +60,45 @@ References:
   - Do not import React just for JSX: no `import React from "react"`.
   - Prefer explicit imports over deep barrel-chains for clarity and tree-shaking.
 
+### Consistent component exports (React Fast Refresh)
+
+- Always export one React component per file as the default export. Do not mix non-component exports in the same file. This keeps Vite React Fast Refresh stable and avoids full page reloads. See: [Vite plugin react – Consistent components exports](https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports).
+- Entry files (that call `createRoot(...).render(...)`) must not export components; they only import and render them.
+- Co-locate helpers/constants in separate files; import them into the component if needed.
+
+Do:
+
+```ts
+// src/renderer/src/components/user-card.tsx
+type Props = { name: string }
+export default function UserCard({ name }: Props): React.JSX.Element {
+  return <div className="user-card">{name}</div>
+}
+```
+
+```ts
+// src/renderer/user-card-entry.tsx (entry only)
+import { createRoot } from 'react-dom/client'
+import { StrictMode } from 'react'
+import UserCard from './src/components/user-card'
+
+const container = document.getElementById('root')!
+createRoot(container).render(
+  <StrictMode>
+    <UserCard name="Alice" />
+  </StrictMode>,
+)
+```
+
+Avoid:
+
+```ts
+// src/renderer/src/components/user-card.tsx
+export const IS_DEV = import.meta.env.DEV // ❌ non-component export here breaks Fast Refresh
+export function helper() {/* ... */}
+export default function UserCard() {/* ... */}
+```
+
 ## Hooks (UI-only, no I/O)
 
 - Custom hooks encapsulate UI behavior, composition, and memoization.
