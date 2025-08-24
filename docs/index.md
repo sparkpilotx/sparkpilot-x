@@ -18,9 +18,11 @@
 - `immer v10`
 
 ## Styling
-- `Tailwind CSS v4`
+- `tailwindcss v4`
 - `@tailwindcss/vite v4`
 - `tailwind-merge v3`
+- `class-variance-authority v0`
+- `tw-animate-css v1`
 
 ## Validation
 - `Zod v3.25.67` (pinned for compatibility)
@@ -63,7 +65,7 @@ and ensure the code remains maintainable and scalable as the project grows.
         - `ui/` : reusable UI primitives
         - `layout/` : layout components (navigation, shell, etc.)
       - `hooks/` : React hooks (custom logic like useTheme, useShortcut)
-      - `stores/` : state management (e.g., zustand slices, context)
+      - `store/` : state management (e.g., zustand slices, context)
       - `lib/` : renderer-side utilities (helpers, constants)
       - `services/` : API calls or IPC-based services
       - `App.tsx` : root React component
