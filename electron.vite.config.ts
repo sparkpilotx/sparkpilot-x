@@ -55,6 +55,8 @@ export default defineConfig({
           // Preload scripts for sandboxed renderers must not contain ES module syntax.
           // Use 'cjs' so preload works with sandbox: true.
           format: 'cjs',
+          // Emit a deterministic filename so main can reference a single path in all modes
+          entryFileNames: 'index.cjs',
         },
       },
     },
@@ -77,8 +79,10 @@ export default defineConfig({
     build: {
       rollupOptions: {
         input: {
-          // Main entry point for the renderer process
+          // Main content view
           main: resolve('src/renderer/index.html'),
+          // Titlebar view
+          titlebar: resolve('src/renderer/titlebar.html'),
         },
       },
     },

@@ -63,4 +63,20 @@ export default [
       ],
     },
   },
+  // Ensure renderer files use the web tsconfig so ambient preload types are included
+  {
+    files: ['src/renderer/**/*.ts', 'src/renderer/**/*.tsx'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        project: ['./tsconfig.web.json'],
+        tsconfigRootDir,
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tsPlugin,
+    },
+  },
 ]

@@ -1,16 +1,7 @@
 {
   "extends": "@electron-toolkit/tsconfig/tsconfig.node.json",
   "include": ["electron.vite.config.ts", "src/main/**/*.ts", "src/preload/**/*.ts"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-    "out",
-    "references/**",
-    "context-engineering/**",
-    ".cursor/**",
-    ".gemini/**"
-  ],
+  "exclude": ["node_modules", "dist", "build", "out", "docs/**", ".cursor/**", ".gemini/**"],
   "compilerOptions": {
     "strict": true,
     "composite": true,
@@ -21,7 +12,8 @@
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/main/*"]
+      "@/*": ["src/main/*"],
+      "@shared/*": ["src/main/shared/*"]
     }
   }
 }
