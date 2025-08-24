@@ -12,16 +12,8 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["src/main/shared/*"],
+      "@shared/*": ["src/main/shared/*"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-    "out",
-    "docs/**",
-    ".cursor/**",
-    ".gemini/**"
-  ]
+  "exclude": ["node_modules", "dist", "build", "out", "docs/**", ".cursor/**", ".gemini/**"]
 }

@@ -10,15 +10,7 @@ const typescriptFiles = ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts']
 export default [
   {
     // Keep in sync with tsconfig excludes
-    ignores: [
-      'node_modules',
-      'dist',
-      'build',
-      'out',
-      'docs/**',
-      '.cursor/**',
-      '.gemini/**'
-    ],
+    ignores: ['node_modules', 'dist', 'build', 'out', 'docs/**', '.cursor/**', '.gemini/**'],
   },
   {
     files: typescriptFiles,
