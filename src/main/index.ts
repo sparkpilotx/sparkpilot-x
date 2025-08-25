@@ -37,7 +37,7 @@ async function createMainWindow(): Promise<void> {
   // Views: titlebar (top) + main content (rest)
   const titlebarView = new WebContentsView({
     webPreferences: {
-      preload: resolvePreloadFile('index.cjs'),
+      preload: resolvePreloadFile('titlebar.cjs'),
       sandbox: true,
       contextIsolation: true,
       nodeIntegration: false,
@@ -57,7 +57,7 @@ async function createMainWindow(): Promise<void> {
   const mainContentView = new WebContentsView({
     webPreferences: {
       // Preload runs with sandbox: true (see electron.vite.config.ts)
-      preload: resolvePreloadFile('index.cjs'),
+      preload: resolvePreloadFile('main.cjs'),
       sandbox: true,
       contextIsolation: true,
       nodeIntegration: false,
@@ -136,12 +136,12 @@ async function createMainWindow(): Promise<void> {
 
   if (devBase) {
     // Electron-Vite dev server
-    await titlebarView.webContents.loadURL(`${devBase}/titlebar.html`)
-    await mainContentView.webContents.loadURL(`${devBase}/index.html`)
+    await titlebarView.webContents.loadURL(`${devBase}/apps/titlebar/index.html`)
+    await mainContentView.webContents.loadURL(`${devBase}/apps/main/index.html`)
   } else {
     // Packaged build
-    await titlebarView.webContents.loadFile(resolveRendererFile('titlebar.html'))
-    await mainContentView.webContents.loadFile(resolveRendererFile('index.html'))
+    await titlebarView.webContents.loadFile(resolveRendererFile('apps/titlebar/index.html'))
+    await mainContentView.webContents.loadFile(resolveRendererFile('apps/main/index.html'))
   }
 
   // Initial layout after content is ready

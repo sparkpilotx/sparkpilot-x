@@ -1,10 +1,12 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import Titlebar from './components/titlebar'
+import App from '../../src/App'
 
-const container = document.getElementById('titlebar-root')!
+const container = document.getElementById('root')!
 createRoot(container).render(
   <StrictMode>
-    <Titlebar />
+    <App />
   </StrictMode>,
 )
+
+

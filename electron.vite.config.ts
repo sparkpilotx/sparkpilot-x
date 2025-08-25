@@ -51,12 +51,15 @@ export default defineConfig({
     ],
     build: {
       rollupOptions: {
+        input: {
+          main: resolve('src/preload/apps/main/index.ts'),
+          titlebar: resolve('src/preload/apps/titlebar/index.ts'),
+        },
         output: {
           // Preload scripts for sandboxed renderers must not contain ES module syntax.
           // Use 'cjs' so preload works with sandbox: true.
           format: 'cjs',
-          // Emit a deterministic filename so main can reference a single path in all modes
-          entryFileNames: 'index.cjs',
+          entryFileNames: '[name].cjs',
         },
       },
     },
@@ -80,9 +83,9 @@ export default defineConfig({
       rollupOptions: {
         input: {
           // Main content view
-          main: resolve('src/renderer/index.html'),
+          main: resolve('src/renderer/apps/main/index.html'),
           // Titlebar view
-          titlebar: resolve('src/renderer/titlebar.html'),
+          titlebar: resolve('src/renderer/apps/titlebar/index.html'),
         },
       },
     },
