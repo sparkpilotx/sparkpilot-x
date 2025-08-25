@@ -7,5 +7,5 @@ export function getRuntimeVersions(): RuntimeVersions {
     return (api as { system: { versions: () => RuntimeVersions } }).system.versions()
   }
   // Fallback for titlebar renderer which does not expose system
-  return { electron: process.versions.electron ?? '', node: process.versions.node }
+  return { electron: '', node: '' }
 }

@@ -1,6 +1,5 @@
 import type { ThemeSource } from '@shared/types'
-import { getThemeSource } from '@pshared/theme'
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, nativeTheme } from 'electron'
 
 // Minimal surface for titlebar-only renderer
 const title = {
@@ -16,7 +15,7 @@ const title = {
 
 const theme = {
   getSource(): ThemeSource {
-    return getThemeSource()
+    return nativeTheme.themeSource as ThemeSource
   },
 } as const
 
