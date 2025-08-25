@@ -169,10 +169,7 @@ async function createMainWindow(): Promise<void> {
   // Ensure the main content view has focus so DevTools actions target it
   mainContentView.webContents.focus()
 
-  if (is.dev) {
-    const contents = mainContentView.webContents
-    console.warn(contents)
-  }
+  console.log('is dev', is.dev)
 }
 
 app.whenReady().then(() => {

@@ -6,7 +6,6 @@ asarUnpack:
 electronDownload:
   mirror: https://github.com/electron/electron/releases/download/
 electronDist: node_modules/electron/dist
-electronVersion: 37.3.1
 files:
   - out/**
   - package.json
@@ -23,7 +22,7 @@ mac:
   hardenedRuntime: true
   gatekeeperAssess: false
   category: public.app-category.productivity
-  binaryName: sparkpilot-x
+  executableName: sparkpilot-x
 dmg:
   artifactName: ${name}-${version}.${ext}
   sign: false

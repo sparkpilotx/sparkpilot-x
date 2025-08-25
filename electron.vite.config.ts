@@ -50,6 +50,8 @@ export default defineConfig({
       // externalizeDepsPlugin() is removed to bundle deps for sandbox
     ],
     build: {
+      // Keep existing files when running sequential per-entry builds
+      emptyOutDir: false,
       rollupOptions: {
         input:
           process.env.PRELOAD_ENTRY === 'titlebar'
