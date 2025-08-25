@@ -8,5 +8,3 @@ createRoot(container).render(
     <Titlebar />
   </StrictMode>,
 )
-
-

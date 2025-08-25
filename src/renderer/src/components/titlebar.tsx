@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { useAppStore } from '@/stores/use-app-store'
-import { onTitleChanged, getAppTitle } from '@/services/title'
+import { useAppStore } from '@rshared/stores/use-app-store'
+import { onTitleChanged, getAppTitle } from '@rshared/services/title'
 
 export default function Titlebar(): React.JSX.Element {
   const title = useAppStore((s) => s.title)

@@ -51,7 +51,8 @@ async function createMainWindow(): Promise<void> {
   titlebarView.webContents.on('did-finish-load', () => {
     titlebarWebContentsId = titlebarView.webContents.id
     if (currentTitle) {
-      titlebarWebContentsId && webContents.fromId(titlebarWebContentsId)?.send('title:changed', currentTitle)
+      titlebarWebContentsId &&
+        webContents.fromId(titlebarWebContentsId)?.send('title:changed', currentTitle)
     }
   })
   const mainContentView = new WebContentsView({
@@ -79,13 +80,31 @@ async function createMainWindow(): Promise<void> {
       if (is.dev) console.warn('renderer unresponsive')
     })
     wc.on('responsive', () => {
-      if (is.dev) console.info('renderer responsive again')
+      if (is.dev) console.warn('renderer responsive again')
     })
-    wc.on('did-fail-load', (_e, errorCode, errorDescription, validatedURL, isMainFrame, frameProcessId, frameRoutingId) => {
-      if (is.dev) {
-        console.error('load failed', { errorCode, errorDescription, validatedURL, isMainFrame, frameProcessId, frameRoutingId })
-      }
-    })
+    wc.on(
+      'did-fail-load',
+      (
+        _e,
+        errorCode,
+        errorDescription,
+        validatedURL,
+        isMainFrame,
+        frameProcessId,
+        frameRoutingId,
+      ) => {
+        if (is.dev) {
+          console.error('load failed', {
+            errorCode,
+            errorDescription,
+            validatedURL,
+            isMainFrame,
+            frameProcessId,
+            frameRoutingId,
+          })
+        }
+      },
+    )
     wc.on('preload-error', (_e, path, error) => {
       if (is.dev) console.error('preload error', path, error)
     })
@@ -119,7 +138,7 @@ async function createMainWindow(): Promise<void> {
     titlebarWebContentsId = null
     mainWindowRef = null
 
-    if (is.dev) console.log('closed')
+    if (is.dev) console.warn('closed')
   })
 
   // Dev vs prod loading
@@ -152,7 +171,7 @@ async function createMainWindow(): Promise<void> {
 
   if (is.dev) {
     const contents = mainContentView.webContents
-    console.log(contents)
+    console.warn(contents)
   }
 }
 

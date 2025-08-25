@@ -96,6 +96,7 @@ export default defineConfig({
         '@shared': resolve('src/main/shared'),
         '@': resolve('src/renderer/src'),
         '@/': resolve('src/renderer/src'),
+        '@rshared': resolve('src/renderer/shared'),
       },
     },
 

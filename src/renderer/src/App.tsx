@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { getRuntimeVersions } from './services/system'
-import { setAppTitle } from './services/title'
+import { getRuntimeVersions } from '@rshared/services/system'
+import { setAppTitle } from '@rshared/services/title'
 
 export default function App(): React.JSX.Element {
   const versions = getRuntimeVersions()
