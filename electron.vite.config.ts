@@ -44,6 +44,7 @@ export default defineConfig({
       alias: {
         // Shared utilities accessible to main and preload processes
         '@shared': resolve('src/main/shared'),
+        '@pshared': resolve('src/preload/shared'),
       },
     },
     plugins: [

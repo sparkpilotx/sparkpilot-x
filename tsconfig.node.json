@@ -13,7 +13,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/main/*"],
-      "@shared/*": ["src/main/shared/*"]
+      "@shared/*": ["src/main/shared/*"],
+      "@pshared/*": ["src/preload/shared/*"]
     }
   }
 }
