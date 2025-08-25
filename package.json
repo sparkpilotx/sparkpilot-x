@@ -11,7 +11,7 @@
     "build": "electron-vite build",
     "build:mac": "npm run build && ELECTRON_MIRROR=https://github.com/electron/electron/releases/download/ HTTP_PROXY=http://127.0.0.1:2022 HTTPS_PROXY=http://127.0.0.1:2022 CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --publish never",
     "clean": "rm -rf dist",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p tsconfig.web.main.json -p tsconfig.web.titlebar.json",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
     "format": "prettier . --write",
