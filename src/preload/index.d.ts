@@ -1,4 +1,4 @@
-import type { RuntimeVersions } from '@shared/types'
+import type { RuntimeVersions, ThemeSource } from '@shared/types'
 
 export type XApi =
   | {
@@ -8,12 +8,18 @@ export type XApi =
         set: (title: string) => void
         get: () => Promise<string>
       }
+      theme: {
+        getSource: () => ThemeSource
+      }
     }
   | {
       // Minimal xAPI for titlebar renderer
       title: {
         onChanged: (handler: (title: string) => void) => () => void
         get: () => Promise<string>
+      }
+      theme: {
+        getSource: () => ThemeSource
       }
     }
 

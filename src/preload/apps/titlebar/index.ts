@@ -1,3 +1,5 @@
+import type { ThemeSource } from '@shared/types'
+import { getThemeSource } from '@pshared/theme'
 import { contextBridge, ipcRenderer } from 'electron'
 
 // Minimal surface for titlebar-only renderer
@@ -12,6 +14,12 @@ const title = {
   },
 } as const
 
-export const xAPI = { title } as const
+const theme = {
+  getSource(): ThemeSource {
+    return getThemeSource()
+  },
+} as const
+
+export const xAPI = { title, theme } as const
 
 contextBridge.exposeInMainWorld('xAPI', xAPI)

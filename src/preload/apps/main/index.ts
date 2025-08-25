@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import type { RuntimeVersions } from '@shared/types'
+import type { RuntimeVersions, ThemeSource } from '@shared/types'
+import { getThemeSource } from '@pshared/theme'
 
 const system = {
   versions(): RuntimeVersions {
@@ -22,6 +23,11 @@ const title = {
 export const xAPI = {
   system,
   title,
+  theme: {
+    getSource(): ThemeSource {
+      return getThemeSource()
+    },
+  },
 } as const
 
 contextBridge.exposeInMainWorld('xAPI', xAPI)
