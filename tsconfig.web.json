@@ -15,12 +15,7 @@
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/renderer/src/*"],
       "@shared/*": ["src/main/shared/*"],
-      "@/components/*": ["src/renderer/src/components/*"],
-      "@/lib/*": ["src/renderer/src/lib/*"],
-      "@/hooks/*": ["src/renderer/src/hooks/*"],
-      "@/stores/*": ["src/renderer/src/stores/*"],
       "@rshared/*": ["src/renderer/shared/*"]
     }
   }
