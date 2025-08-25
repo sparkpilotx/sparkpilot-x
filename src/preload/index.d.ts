@@ -6,7 +6,6 @@ export type XApi =
       system: { versions: () => RuntimeVersions }
       title: {
         set: (title: string) => void
-        onChanged: (handler: (title: string) => void) => () => void
         get: () => Promise<string>
       }
     }

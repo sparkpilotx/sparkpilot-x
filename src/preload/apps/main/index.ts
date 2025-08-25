@@ -14,11 +14,6 @@ const title = {
   set(newTitle: string): void {
     ipcRenderer.send('title:set', newTitle)
   },
-  onChanged(handler: (title: string) => void): () => void {
-    const listener = (_event: unknown, value: string): void => handler(value)
-    ipcRenderer.on('title:changed', listener)
-    return () => ipcRenderer.off('title:changed', listener)
-  },
   async get(): Promise<string> {
     return ipcRenderer.invoke('title:get') as Promise<string>
   },

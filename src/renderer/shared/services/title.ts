@@ -1,7 +1,7 @@
 type TitleApiShape = {
   title: {
     set?: (t: string) => void
-    onChanged: (h: (t: string) => void) => () => void
+    onChanged?: (h: (t: string) => void) => () => void
     get: () => Promise<string>
   }
 }
@@ -25,7 +25,7 @@ export function setAppTitle(title: string): void {
 
 export function onTitleChanged(handler: (title: string) => void): () => void {
   const api = window.xAPI as unknown
-  if (hasTitleApi(api)) {
+  if (hasTitleApi(api) && typeof api.title.onChanged === 'function') {
     return api.title.onChanged(handler)
   }
   return () => {}
