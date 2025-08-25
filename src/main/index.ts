@@ -1,5 +1,10 @@
-import { app, BaseWindow, WebContentsView, Menu, webContents } from 'electron'
+import { app, BaseWindow, WebContentsView, Menu, webContents, ipcMain, shell } from 'electron'
 import { fileURLToPath } from 'node:url'
+import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+
+let mainWindowRef: BaseWindow | null = null
+let titlebarWebContentsId: number | null = null
+let currentTitle = 'SparkPilot-X'
 
 function resolveRendererFile(relativePath: string): string {
   // Resolve a file in the built renderer relative to the compiled main file
@@ -22,13 +27,33 @@ async function createMainWindow(): Promise<void> {
     fullscreenable: false,
     // Keep defaults secure; views will set their own webPreferences
   })
+  mainWindow.setTitle(currentTitle)
+  mainWindowRef = mainWindow
   // Enforce 16:9 window aspect ratio
   mainWindow.setAspectRatio(16 / 9)
   // Minimum size at 16:9
   mainWindow.setMinimumSize(960, 540)
 
   // Views: titlebar (top) + main content (rest)
-  const titlebarView = new WebContentsView()
+  const titlebarView = new WebContentsView({
+    webPreferences: {
+      preload: resolvePreloadFile('index.cjs'),
+      sandbox: true,
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  })
+  // Titlebar hygiene: keep it inert and lightweight
+  titlebarView.webContents.setIgnoreMenuShortcuts(true)
+  titlebarView.webContents.setVisualZoomLevelLimits(1, 1)
+  titlebarView.webContents.setAudioMuted(true)
+  titlebarWebContentsId = titlebarView.webContents.id
+  titlebarView.webContents.on('did-finish-load', () => {
+    titlebarWebContentsId = titlebarView.webContents.id
+    if (currentTitle) {
+      titlebarWebContentsId && webContents.fromId(titlebarWebContentsId)?.send('title:changed', currentTitle)
+    }
+  })
   const mainContentView = new WebContentsView({
     webPreferences: {
       // Preload runs with sandbox: true (see electron.vite.config.ts)
@@ -38,6 +63,33 @@ async function createMainWindow(): Promise<void> {
       nodeIntegration: false,
     },
   })
+
+  // Popup policy: deny window.open and open externally
+  mainContentView.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url)
+    return { action: 'deny' }
+  })
+
+  // Diagnostics: observe renderer health and load failures
+  for (const wc of [titlebarView.webContents, mainContentView.webContents]) {
+    wc.on('render-process-gone', (_e, details) => {
+      if (is.dev) console.error('renderer gone', details)
+    })
+    wc.on('unresponsive', () => {
+      if (is.dev) console.warn('renderer unresponsive')
+    })
+    wc.on('responsive', () => {
+      if (is.dev) console.info('renderer responsive again')
+    })
+    wc.on('did-fail-load', (_e, errorCode, errorDescription, validatedURL, isMainFrame, frameProcessId, frameRoutingId) => {
+      if (is.dev) {
+        console.error('load failed', { errorCode, errorDescription, validatedURL, isMainFrame, frameProcessId, frameRoutingId })
+      }
+    })
+    wc.on('preload-error', (_e, path, error) => {
+      if (is.dev) console.error('preload error', path, error)
+    })
+  }
 
   // Attach views to window contentView
   mainWindow.contentView.addChildView(titlebarView)
@@ -57,8 +109,30 @@ async function createMainWindow(): Promise<void> {
 
   mainWindow.on('resize', layout)
 
+  // Resource management: explicitly close WebContents of child views
+  // to avoid leaks when the BaseWindow is closed.
+  // Ref: https://www.electronjs.org/docs/latest/api/base-window#resource-management
+  mainWindow.on('closed', () => {
+    if (!titlebarView.webContents.isDestroyed()) titlebarView.webContents.close()
+    if (!mainContentView.webContents.isDestroyed()) mainContentView.webContents.close()
+
+    titlebarWebContentsId = null
+    mainWindowRef = null
+
+    if (is.dev) console.log('closed')
+  })
+
   // Dev vs prod loading
   const devBase = process.env.ELECTRON_RENDERER_URL?.replace(/\/$/, '')
+
+  // Externalize navigations: keep app confined to its own origin
+  mainContentView.webContents.on('will-navigate', (event, url) => {
+    const allowInDev = !!devBase && url.startsWith(devBase)
+    const allowInProd = !devBase && url.startsWith('file:')
+    if (allowInDev || allowInProd) return
+    event.preventDefault()
+    shell.openExternal(url)
+  })
 
   if (devBase) {
     // Electron-Vite dev server
@@ -75,10 +149,37 @@ async function createMainWindow(): Promise<void> {
 
   // Ensure the main content view has focus so DevTools actions target it
   mainContentView.webContents.focus()
+
+  if (is.dev) {
+    const contents = mainContentView.webContents
+    console.log(contents)
+  }
 }
 
 app.whenReady().then(() => {
+  // Set app user model ID for Windows notifications and shell integration
+  electronApp.setAppUserModelId('io.ai-copilots.sparkpilot-x')
+
+  // Watch common window shortcuts (F12 toggle in dev; ignore reload in prod)
+  app.on('browser-window-created', (_event, window) => {
+    optimizer.watchWindowShortcuts(window)
+  })
+
   void createMainWindow()
+
+  // Title IPC: accept updates (fire-and-forget) and targeted broadcast to titlebar view
+  ipcMain.removeAllListeners('title:set')
+  ipcMain.on('title:set', (_event, newTitle: string) => {
+    currentTitle = newTitle
+    mainWindowRef?.setTitle(newTitle)
+    if (titlebarWebContentsId) {
+      webContents.fromId(titlebarWebContentsId)?.send('title:changed', newTitle)
+    }
+  })
+
+  // Title IPC: get current title
+  ipcMain.removeHandler('title:get')
+  ipcMain.handle('title:get', async () => currentTitle)
 
   // Replace default menu to support DevTools with Views-based windows
   const isMac = process.platform === 'darwin'

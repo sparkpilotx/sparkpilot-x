@@ -1,7 +1,17 @@
+import { useEffect } from 'react'
 import { getRuntimeVersions } from './services/system'
+import { setAppTitle } from './services/title'
 
 export default function App(): React.JSX.Element {
   const versions = getRuntimeVersions()
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      const random = Math.random().toString(36).slice(2, 8)
+      setAppTitle(`SparkPilot-X · ${random}`)
+    }, 2000)
+    return () => clearInterval(id)
+  }, [])
 
   return (
     <main className="p-6 text-sm text-neutral-800 dark:text-neutral-200">

@@ -1,4 +1,4 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import type { RuntimeVersions } from '@shared/types'
 
 // Preload composes a minimal, serializable API exposed to the renderer.
@@ -12,9 +12,24 @@ const system = {
   },
 } as const
 
+const title = {
+  set(newTitle: string): void {
+    ipcRenderer.send('title:set', newTitle)
+  },
+  onChanged(handler: (title: string) => void): () => void {
+    const listener = (_event: unknown, value: string) => handler(value)
+    ipcRenderer.on('title:changed', listener)
+    return () => ipcRenderer.off('title:changed', listener)
+  },
+  async get(): Promise<string> {
+    return ipcRenderer.invoke('title:get')
+  },
+} as const
+
 // Expose a single xAPI object under window.xAPI
 export const xAPI = {
   system,
+  title,
 } as const
 
 contextBridge.exposeInMainWorld('xAPI', xAPI)

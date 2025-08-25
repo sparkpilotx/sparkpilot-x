@@ -2,3 +2,12 @@
 @import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
+
+/* Electron drag regions for custom titlebar */
+[data-drag] {
+  -webkit-app-region: drag;
+}
+
+[data-no-drag] {
+  -webkit-app-region: no-drag;
+}

@@ -91,6 +91,8 @@ export default defineConfig({
       alias: {
         // Shared utilities accessible across all processes
         '@shared': resolve('src/main/shared'),
+        '@': resolve('src/renderer/src'),
+        '@/': resolve('src/renderer/src'),
       },
     },
 
