@@ -1,5 +1,7 @@
 import type { ThemeSource } from '@shared/types'
-import { contextBridge, ipcRenderer, nativeTheme } from 'electron'
+type ThemeAPI = { getSource: () => ThemeSource }
+import { contextBridge, ipcRenderer } from 'electron'
+import { nativeTheme } from 'electron'
 
 // Minimal surface for titlebar-only renderer
 const title = {
@@ -17,7 +19,7 @@ const theme = {
   getSource(): ThemeSource {
     return nativeTheme.themeSource as ThemeSource
   },
-} as const
+} satisfies ThemeAPI
 
 export const xAPI = { title, theme } as const
 

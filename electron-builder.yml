@@ -11,7 +11,6 @@ files:
   - node_modules/**
 mac:
   entitlementsInherit: build/entitlements.mac.plist
-  icon: src/renderer/public/logo/icon-logo.icns
   extendInfo:
     NSCameraUsageDescription: Application requests access to the device's camera.
     NSMicrophoneUsageDescription: Application requests access to the device's microphone.
@@ -26,9 +25,7 @@ dmg:
   artifactName: ${name}-${version}.${ext}
   sign: false
 npmRebuild: false
-extraResources:
-  - from: 'src/renderer/public/logo'
-    to: 'logo'
+extraResources: []
 # publish:
 #   provider: generic
 #   url: https://example.com/auto-updates

@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type { RuntimeVersions, ThemeSource } from '@shared/types'
+type ThemeAPI = { getSource: () => ThemeSource }
 import { nativeTheme } from 'electron'
 
 const system = {
@@ -27,7 +28,7 @@ export const xAPI = {
     getSource(): ThemeSource {
       return nativeTheme.themeSource as ThemeSource
     },
-  },
+  } satisfies ThemeAPI,
 } as const
 
 contextBridge.exposeInMainWorld('xAPI', xAPI)

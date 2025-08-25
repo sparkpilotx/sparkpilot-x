@@ -44,7 +44,6 @@ export default defineConfig({
       alias: {
         // Shared utilities accessible to main and preload processes
         '@shared': resolve('src/main/shared'),
-        '@pshared': resolve('src/preload/shared'),
       },
     },
     plugins: [
@@ -52,15 +51,23 @@ export default defineConfig({
     ],
     build: {
       rollupOptions: {
-        input: {
-          main: resolve('src/preload/apps/main/index.ts'),
-          titlebar: resolve('src/preload/apps/titlebar/index.ts'),
-        },
+        input:
+          process.env.PRELOAD_ENTRY === 'titlebar'
+            ? { titlebar: resolve('src/preload/apps/titlebar/index.ts') }
+            : process.env.PRELOAD_ENTRY === 'main'
+              ? { main: resolve('src/preload/apps/main/index.ts') }
+              : {
+                  main: resolve('src/preload/apps/main/index.ts'),
+                  titlebar: resolve('src/preload/apps/titlebar/index.ts'),
+                },
         output: {
           // Preload scripts for sandboxed renderers must not contain ES module syntax.
           // Use 'cjs' so preload works with sandbox: true.
           format: 'cjs',
           entryFileNames: '[name].cjs',
+          ...(process.env.PRELOAD_ENTRY
+            ? { inlineDynamicImports: true }
+            : { manualChunks: () => undefined }),
         },
       },
     },
